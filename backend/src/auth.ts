@@ -32,5 +32,5 @@ export const auth = betterAuth({
       },
     },
   },
-  trustedOrigins: ["http://localhost:5173"],
+  trustedOrigins: process.env.TRUSTED_ORIGINS?.split(",").map(s => s.trim()) || [],
 });

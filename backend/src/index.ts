@@ -7,7 +7,7 @@ import usersRouter from "./routes/users"
 const app = express()
 
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin: process.env.TRUSTED_ORIGINS?.split(",").map(s => s.trim()) || [],
   credentials: true,
 }))
 
