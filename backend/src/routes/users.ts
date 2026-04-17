@@ -3,7 +3,6 @@ import { PrismaClient } from "@prisma/client"
 import bcrypt from "bcrypt"
 import { z } from "zod"
 import { requireAuth, requireRole } from "../middleware/session"
-import { Role } from "../types/role"
 
 const router = Router()
 const prisma = new PrismaClient()
@@ -20,7 +19,7 @@ const changePasswordSchema = z.object({
 })
 
 // GET /users - List all agents (admin only)
-router.get("/", requireAuth, requireRole(Role.ADMIN), async (_req, res) => {
+router.get("/", requireAuth, requireRole("ADMIN"), async (_req, res) => {
   try {
     const users = await prisma.user.findMany({
       select: {
@@ -39,16 +38,17 @@ router.get("/", requireAuth, requireRole(Role.ADMIN), async (_req, res) => {
 })
 
 // POST /users - Create a new agent (admin only)
-router.post("/", requireAuth, requireRole(Role.ADMIN), async (req, res) => {
+router.post("/", requireAuth, requireRole("ADMIN"), async (req, res) => {
   const result = createUserSchema.safeParse(req.body)
 
   if (!result.success) {
-    res.status(400).json({ error: result.error.errors[0].message })
+    const errorMessage = result.error.errors[0]?.message ?? "Validation failed"
+    res.status(400).json({ error: errorMessage })
     return
   }
 
   const { email, password, name, role } = result.data
-  const userRole = role === Role.ADMIN ? Role.ADMIN : Role.AGENT
+  const userRole = role === "ADMIN" ? "ADMIN" : "AGENT"
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10)
@@ -56,7 +56,7 @@ router.post("/", requireAuth, requireRole(Role.ADMIN), async (req, res) => {
       data: {
         email,
         name,
-        role: userRole,
+        role: userRole as "ADMIN" | "AGENT",
         accounts: {
           create: {
             accountId: email,
@@ -84,7 +84,7 @@ router.post("/", requireAuth, requireRole(Role.ADMIN), async (req, res) => {
 })
 
 // DELETE /users/:id - Delete a user (admin only)
-router.delete("/:id", requireAuth, requireRole(Role.ADMIN), async (req, res) => {
+router.delete("/:id", requireAuth, requireRole("ADMIN"), async (req, res) => {
   const id = req.params.id as string
 
   if (id === req.user?.id) {
@@ -106,12 +106,13 @@ router.get("/me", requireAuth, async (req, res) => {
 })
 
 // PATCH /users/:id/password - Change user password and invalidate sessions (admin only)
-router.patch("/:id/password", requireAuth, requireRole(Role.ADMIN), async (req, res) => {
+router.patch("/:id/password", requireAuth, requireRole("ADMIN"), async (req, res) => {
   const id = req.params.id as string
 
   const result = changePasswordSchema.safeParse(req.body)
   if (!result.success) {
-    res.status(400).json({ error: result.error.errors[0].message })
+    const errorMessage = result.error.errors[0]?.message ?? "Validation failed"
+    res.status(400).json({ error: errorMessage })
     return
   }
 

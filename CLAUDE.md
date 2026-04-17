@@ -9,7 +9,7 @@ When asking about libraries, frameworks, SDKs, APIs, or CLI tools — **always u
 ## Tech Stack
 
 - Frontend: React 19 + TypeScript + Vite + React Router + Tailwind CSS + shadcn/ui
-- Backend: Express + TypeScript + Bun
+- Backend: Express + TypeScript + Node.js
 - Database: PostgreSQL + Prisma 5
 - Auth: Better Auth with bcrypt password hashing
 - AI: MiniMax API
@@ -56,7 +56,7 @@ import { Card } from "@/components/ui/card"
 **Phase 1: Project Setup**
 
 - Frontend scaffold with Vite + React + TypeScript + Tailwind + React Router
-- Backend scaffold with Express + TypeScript + Bun
+- Backend scaffold with Express + TypeScript + Node.js
 - Prisma initialized with PostgreSQL
 - StatusCheck component for health check
 

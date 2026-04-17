@@ -4,9 +4,9 @@ import { useSession as useBetterAuthSession, signOut as betterAuthSignOut } from
 interface User {
   id: string
   name: string
-  email: string
+  email?: string
   image?: string | null
-  emailVerified: boolean
+  emailVerified?: boolean
   role?: string
 }
 
