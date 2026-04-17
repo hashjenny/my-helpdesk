@@ -20,6 +20,7 @@ When asking about libraries, frameworks, SDKs, APIs, or CLI tools — **always u
 This project uses **shadcn/ui** with Tailwind CSS v4 and the `base-nova` style variant.
 
 ### Key Components Available
+
 - `Button` - button with variants (default, outline, ghost, destructive)
 - `Card` - card components (Card, CardHeader, CardContent, CardTitle, CardDescription)
 - `Input` - form input field
@@ -29,13 +30,16 @@ This project uses **shadcn/ui** with Tailwind CSS v4 and the `base-nova` style v
 - `Separator` - horizontal/vertical separator
 
 ### Import Alias
+
 Use `@/` prefix for imports from `frontend/src/`:
+
 ```tsx
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 ```
 
 ### Path Configuration
+
 - TypeScript: `tsconfig.app.json` with `baseUrl: "."` and `paths: { "@/*": ["./src/*"] }`
 - Vite: `vite.config.ts` with resolve alias for `@`
 
@@ -50,12 +54,14 @@ import { Card } from "@/components/ui/card"
 ### Completed Phases
 
 **Phase 1: Project Setup**
+
 - Frontend scaffold with Vite + React + TypeScript + Tailwind + React Router
 - Backend scaffold with Express + TypeScript + Bun
 - Prisma initialized with PostgreSQL
 - StatusCheck component for health check
 
 **Phase 2: Database Schema & Models**
+
 - User model (ADMIN, AGENT roles)
 - Ticket model (OPEN, RESOLVED, CLOSED statuses; GENERAL, TECHNICAL, REFUND categories)
 - TicketResponse model
@@ -63,6 +69,7 @@ import { Card } from "@/components/ui/card"
 - Migrations applied to PostgreSQL
 
 **Phase 3: Authentication**
+
 - Better Auth integration with Express
 - User registration and login (frontend + backend)
 - Session middleware and role-based access control
@@ -74,6 +81,17 @@ import { Card } from "@/components/ui/card"
 
 **Phase 4: Ticket Management** (upcoming)
 
+### Navigation
+
+- `/tickets` - Ticket list (authenticated users)
+- `/users` - User management (admin only)
+- `/admin/users` - Admin user panel (admin only)
+
+### Test Users
+
+- Admin: admin@helpdesk.com (password via ADMIN_PASSWORD env)
+- Agent: agent@desk.com / toor
+
 ### Database
 
 - PostgreSQL running on localhost:5432
@@ -83,8 +101,8 @@ import { Card } from "@/components/ui/card"
 
 ### Running Services
 
-- Frontend: http://localhost:5173
-- Backend: http://localhost:3001
+- Frontend: <http://localhost:5173>
+- Backend: <http://localhost:3001>
 
 ### Implementation Plan
 
