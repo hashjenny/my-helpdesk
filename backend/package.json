@@ -3,6 +3,9 @@
   "module": "index.ts",
   "type": "module",
   "private": true,
+  "scripts": {
+    "seed": "bun run prisma/seed.ts"
+  },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
     "@types/bun": "latest",
@@ -22,5 +25,8 @@
     "express": "^5.2.1",
     "hono": "^4.12.14",
     "prisma": "5"
+  },
+  "prisma": {
+    "seed": "bun run prisma/seed.ts"
   }
 }

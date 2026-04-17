@@ -12,6 +12,7 @@
   "dependencies": {
     "@prisma/client": "^7.7.0",
     "@tailwindcss/vite": "^4.2.2",
+    "better-auth": "^1.6.5",
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "prisma": "^7.7.0",

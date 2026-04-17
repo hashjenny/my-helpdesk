@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from "express"
-import { auth } from "../auth"
 import { PrismaClient } from "@prisma/client"
+import { Role } from "../types/role"
 
 const prisma = new PrismaClient()
 
@@ -31,14 +31,14 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
   next()
 }
 
-export function requireRole(...roles: string[]) {
+export function requireRole(...roles: Role[]) {
   return (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
       res.status(401).json({ error: "Unauthorized" })
       return
     }
 
-    if (!roles.includes(req.user.role)) {
+    if (!roles.includes(req.user.role as Role)) {
       res.status(403).json({ error: "Forbidden" })
       return
     }
@@ -54,7 +54,7 @@ declare global {
         id: string
         email: string
         name: string
-        role: string
+        role: Role
       }
     }
   }

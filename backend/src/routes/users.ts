@@ -2,12 +2,13 @@ import { Router } from "express"
 import { PrismaClient } from "@prisma/client"
 import bcrypt from "bcrypt"
 import { requireAuth, requireRole } from "../middleware/session"
+import { Role } from "../types/role"
 
 const router = Router()
 const prisma = new PrismaClient()
 
 // GET /users - List all agents (admin only)
-router.get("/", requireAuth, requireRole("ADMIN"), async (_req, res) => {
+router.get("/", requireAuth, requireRole(Role.ADMIN), async (_req, res) => {
   try {
     const users = await prisma.user.findMany({
       select: {
@@ -26,7 +27,7 @@ router.get("/", requireAuth, requireRole("ADMIN"), async (_req, res) => {
 })
 
 // POST /users - Create a new agent (admin only)
-router.post("/", requireAuth, requireRole("ADMIN"), async (req, res) => {
+router.post("/", requireAuth, requireRole(Role.ADMIN), async (req, res) => {
   const { email, password, name, role } = req.body
 
   if (!email || !password || !name) {
@@ -34,14 +35,22 @@ router.post("/", requireAuth, requireRole("ADMIN"), async (req, res) => {
     return
   }
 
+  const userRole = role === Role.ADMIN ? Role.ADMIN : Role.AGENT
+
   try {
     const hashedPassword = await bcrypt.hash(password, 10)
     const user = await prisma.user.create({
       data: {
         email,
-        password: hashedPassword,
         name,
-        role: role || "AGENT",
+        role: userRole,
+        accounts: {
+          create: {
+            accountId: email,
+            providerId: "credential",
+            password: hashedPassword,
+          },
+        },
       },
       select: {
         id: true,
@@ -62,7 +71,7 @@ router.post("/", requireAuth, requireRole("ADMIN"), async (req, res) => {
 })
 
 // DELETE /users/:id - Delete a user (admin only)
-router.delete("/:id", requireAuth, requireRole("ADMIN"), async (req, res) => {
+router.delete("/:id", requireAuth, requireRole(Role.ADMIN), async (req, res) => {
   const id = req.params.id as string
 
   if (id === req.user?.id) {
