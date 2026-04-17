@@ -11,9 +11,11 @@ function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <header className="flex justify-between items-center px-6 py-4 border-b border-gray-200 bg-white">
-          <h1 className="text-xl font-bold text-gray-900">Helpdesk</h1>
-          <UserBadge />
+        <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="flex h-16 items-center justify-between px-6">
+            <h1 className="text-xl font-bold">Helpdesk</h1>
+            <UserBadge />
+          </div>
         </header>
         <main className="p-6">
           <StatusCheck />

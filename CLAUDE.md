@@ -8,12 +8,36 @@ When asking about libraries, frameworks, SDKs, APIs, or CLI tools — **always u
 
 ## Tech Stack
 
-- Frontend: React 18 + TypeScript + Vite + React Router + Tailwind CSS
+- Frontend: React 19 + TypeScript + Vite + React Router + Tailwind CSS + shadcn/ui
 - Backend: Express + TypeScript + Bun
 - Database: PostgreSQL + Prisma 5
 - Auth: Better Auth with bcrypt password hashing
 - AI: MiniMax API
 - Email: Resend + React Email
+
+## UI Components
+
+This project uses **shadcn/ui** with Tailwind CSS v4 and the `base-nova` style variant.
+
+### Key Components Available
+- `Button` - button with variants (default, outline, ghost, destructive)
+- `Card` - card components (Card, CardHeader, CardContent, CardTitle, CardDescription)
+- `Input` - form input field
+- `Label` - form label
+- `Alert` - alert messages with variants
+- `Table` - table components (Table, TableHeader, TableBody, TableRow, TableHead, TableCell)
+- `Separator` - horizontal/vertical separator
+
+### Import Alias
+Use `@/` prefix for imports from `frontend/src/`:
+```tsx
+import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
+```
+
+### Path Configuration
+- TypeScript: `tsconfig.app.json` with `baseUrl: "."` and `paths: { "@/*": ["./src/*"] }`
+- Vite: `vite.config.ts` with resolve alias for `@`
 
 ## Key Paths
 

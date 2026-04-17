@@ -1,9 +1,23 @@
 import { createContext, useContext } from "react"
-import { useSession, signOut } from "../lib/auth-client"
-import type { Session } from "better-auth"
+import { useSession as useBetterAuthSession, signOut as betterAuthSignOut } from "../lib/auth-client"
+
+interface User {
+  id: string
+  name: string
+  email: string
+  image?: string | null
+  emailVerified: boolean
+  role?: string
+}
+
+interface SessionRecord {
+  id: string
+  expiresAt: Date
+  token: string
+}
 
 interface AuthContextType {
-  session: { data: { user: Session["user"] } | null } | undefined
+  session: { user: User; session: SessionRecord } | null
   isPending: boolean
   signOut: () => void
 }
@@ -11,10 +25,10 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const { data: session, isPending } = useSession()
+  const { data: session, isPending } = useBetterAuthSession()
 
   return (
-    <AuthContext.Provider value={{ session, isPending, signOut }}>
+    <AuthContext.Provider value={{ session, isPending, signOut: betterAuthSignOut }}>
       {children}
     </AuthContext.Provider>
   )
