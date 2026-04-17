@@ -5,7 +5,7 @@ AI-powered ticket management system.
 ## Tech Stack
 
 - **Frontend**: React 18 + TypeScript + Vite + React Router + Tailwind CSS
-- **Backend**: Express + TypeScript + Bun
+- **Backend**: Express + TypeScript + Node.js
 - **Database**: PostgreSQL + Prisma 5
 - **Auth**: Better Auth with bcrypt password hashing
 - **AI**: MiniMax API (upcoming)
@@ -15,7 +15,7 @@ AI-powered ticket management system.
 
 ### Prerequisites
 
-- Node.js 18+ or Bun
+- Node.js 18+
 - PostgreSQL database
 
 ### Installation
@@ -25,11 +25,11 @@ AI-powered ticket management system.
 ```bash
 # Frontend
 cd frontend
-bun install
+npm install
 
 # Backend
 cd backend
-bun install
+npm install
 ```
 
 2. Set up environment variables:
@@ -44,7 +44,7 @@ cp backend/.env.example backend/.env
 
 ```bash
 cd backend
-bunx prisma migrate dev
+npx prisma migrate dev
 ```
 
 4. Start the development servers:
@@ -52,11 +52,11 @@ bunx prisma migrate dev
 ```bash
 # Terminal 1 - Backend
 cd backend
-bun run src/index.ts
+npm run dev
 
 # Terminal 2 - Frontend
 cd frontend
-bun run dev
+npm run dev
 ```
 
 ## Project Structure

@@ -22,7 +22,7 @@ You are an expert security auditor specializing in identifying security vulnerab
 This project uses:
 
 - Frontend: React 19 + TypeScript + Vite
-- Backend: Express + TypeScript + Bun
+- Backend: Express + TypeScript + Node.js
 - Database: PostgreSQL + Prisma 5
 - Auth: Better Auth with bcrypt
 
