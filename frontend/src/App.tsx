@@ -11,11 +11,11 @@ function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 2rem', borderBottom: '1px solid #ddd' }}>
-          <h1>Helpdesk</h1>
+        <header className="flex justify-between items-center px-6 py-4 border-b border-gray-200 bg-white">
+          <h1 className="text-xl font-bold text-gray-900">Helpdesk</h1>
           <UserBadge />
         </header>
-        <main style={{ padding: '2rem' }}>
+        <main className="p-6">
           <StatusCheck />
           <Routes>
             <Route path="/login" element={<Login />} />

@@ -6,7 +6,10 @@ import usersRouter from "./routes/users"
 
 const app = express()
 
-app.use(cors())
+app.use(cors({
+  origin: "http://localhost:5173",
+  credentials: true,
+}))
 
 // Auth routes - must be before express.json()
 app.all("/api/auth/*splat", toNodeHandler(auth))
