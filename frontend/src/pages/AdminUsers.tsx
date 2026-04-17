@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import { useSession } from "../lib/auth-client"
+import { API_BASE } from "../lib/auth-client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -31,18 +32,13 @@ export function AdminUsers() {
   const [showForm, setShowForm] = useState(false)
   const [formData, setFormData] = useState({ email: "", password: "", name: "", role: "AGENT" })
 
-  // Role is stored in our database, not in Better Auth's user type
-  const isAdmin = (session?.user as unknown as User & { role?: string })?.role === "ADMIN"
-
   useEffect(() => {
-    if (isAdmin) {
-      fetchUsers()
-    }
-  }, [isAdmin])
+    fetchUsers()
+  }, [])
 
   const fetchUsers = async () => {
     try {
-      const res = await fetch("http://localhost:3001/api/users", {
+      const res = await fetch(`${API_BASE}/api/users`, {
         headers: {
           Authorization: `Bearer ${session?.session?.token}`,
         },
@@ -62,7 +58,7 @@ export function AdminUsers() {
     setError("")
 
     try {
-      const res = await fetch("http://localhost:3001/api/users", {
+      const res = await fetch(`${API_BASE}/api/users`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -83,7 +79,7 @@ export function AdminUsers() {
     if (!confirm("Are you sure you want to delete this user?")) return
 
     try {
-      const res = await fetch(`http://localhost:3001/api/users/${id}`, {
+      const res = await fetch(`${API_BASE}/api/users/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${session?.session?.token}`,
@@ -94,16 +90,6 @@ export function AdminUsers() {
     } catch {
       setError("Failed to delete user")
     }
-  }
-
-  if (!isAdmin) {
-    return (
-      <div className="p-6">
-        <Alert variant="destructive">
-          <AlertDescription>Access denied. Admin only.</AlertDescription>
-        </Alert>
-      </div>
-    )
   }
 
   if (loading) {

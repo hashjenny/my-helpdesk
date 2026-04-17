@@ -1,7 +1,15 @@
+import type { ReactNode } from "react"
 import { Navigate } from "react-router-dom"
 import { useSession } from "../lib/auth-client"
 
-export function ProtectedRoute({ children }: { children: React.ReactNode }) {
+type Role = "ADMIN" | "AGENT"
+
+interface ProtectedRouteProps {
+  children: ReactNode
+  allowedRoles?: Role[]
+}
+
+export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
   const { data: session, isPending } = useSession()
 
   if (isPending) {
@@ -10,6 +18,13 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   if (!session) {
     return <Navigate to="/login" replace />
+  }
+
+  if (allowedRoles) {
+    const userRole = (session?.user as unknown as { role?: string })?.role
+    if (!allowedRoles.includes(userRole as Role)) {
+      return <Navigate to="/" replace />
+    }
   }
 
   return <>{children}</>
