@@ -91,23 +91,13 @@ import { Card } from "@/components/ui/card"
 
 - Admin: admin@helpdesk.com (password via ADMIN_PASSWORD env)
 - Agent: agent@desk.com / toor
-- E2E Test Admin: admin@test.com / testpass123
 
 ### Database
 
 - PostgreSQL running on localhost:5432
-- Database: helpdesk (production)
-- Test Database: helpdesk_test (independent, preserved after tests)
-- User: postgres / toor
+- Database: helpdesk
+- User: postgres
 - Prisma migrations applied
-
-### E2E Testing
-
-- Playwright with test directory: `./e2e`
-- Independent test database (`helpdesk_test`) - not deleted after tests
-- Setup: `global-setup.ts` creates database, pushes schema, seeds admin user
-- Teardown: `global-teardown.ts` cleans test data via Prisma, preserves database
-- Rate limiting disabled in non-production environments
 
 ### Running Services
 

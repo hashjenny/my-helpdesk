@@ -5,7 +5,6 @@ import { UserBadge } from './components/UserBadge'
 import { StatusCheck } from './components/StatusCheck'
 import { Login } from './pages/Login'
 import { Register } from './pages/Register'
-import { AdminUsers } from './pages/AdminUsers'
 import { Users } from './pages/Users'
 
 function App() {
@@ -65,7 +64,7 @@ function App() {
               path="/admin/users"
               element={
                 <ProtectedRoute allowedRoles={["ADMIN"]}>
-                  <AdminUsers />
+                  <Users />
                 </ProtectedRoute>
               }
             />

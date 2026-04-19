@@ -7,13 +7,15 @@ import usersRouter from "./routes/users"
 
 const app = express()
 
-// Rate limiting for auth endpoints
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
-  standardHeaders: true,
-  legacyHeaders: false,
-})
+// Rate limiting for auth endpoints (disabled in non-production)
+const authLimiter = process.env.NODE_ENV === "production"
+  ? rateLimit({
+      windowMs: 15 * 60 * 1000, // 15 minutes
+      max: 100, // limit each IP to 100 requests per windowMs
+      standardHeaders: true,
+      legacyHeaders: false,
+    })
+  : (_req: express.Request, res: express.Response, next: express.NextFunction) => next()
 
 // CORS configuration with proper fallback
 const trustedOrigins = process.env.TRUSTED_ORIGINS

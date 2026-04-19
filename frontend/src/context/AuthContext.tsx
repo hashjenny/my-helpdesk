@@ -19,7 +19,7 @@ interface SessionRecord {
 interface AuthContextType {
   session: { user: User; session: SessionRecord } | null
   isPending: boolean
-  signOut: () => void
+  signOut: () => Promise<unknown>
 }
 
 const AuthContext = createContext<AuthContextType | null>(null)

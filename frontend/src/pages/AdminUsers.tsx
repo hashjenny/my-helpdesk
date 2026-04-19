@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
-import { useSession } from "../lib/auth-client"
 import { API_BASE } from "../lib/auth-client"
+import { useAuth } from "../context/AuthContext"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -25,7 +25,7 @@ interface User {
 }
 
 export function AdminUsers() {
-  const { data: session } = useSession()
+  const { session } = useAuth()
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")

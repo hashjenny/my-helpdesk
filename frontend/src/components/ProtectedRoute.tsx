@@ -1,6 +1,6 @@
 import type { ReactNode } from "react"
 import { Navigate } from "react-router-dom"
-import { useSession } from "../lib/auth-client"
+import { useAuth } from "../context/AuthContext"
 
 type Role = "ADMIN" | "AGENT"
 
@@ -10,7 +10,7 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
-  const { data: session, isPending } = useSession()
+  const { session, isPending } = useAuth()
 
   if (isPending) {
     return <div className="p-4">Loading session...</div>

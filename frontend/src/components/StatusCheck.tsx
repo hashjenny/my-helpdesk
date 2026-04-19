@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
+import { API_BASE } from "../lib/auth-client"
 
 export function StatusCheck() {
   const [status, setStatus] = useState<string>('Checking...')
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    fetch('http://localhost:3001/api/health')
+    fetch(`${API_BASE}/api/health`)
       .then((res) => res.json())
       .then((data) => setStatus(data.status))
       .catch(() => setError('Failed to connect'))

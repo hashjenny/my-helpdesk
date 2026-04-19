@@ -1,8 +1,8 @@
-import { useSession, signOut } from "../lib/auth-client"
+import { useAuth } from "../context/AuthContext"
 import { Button } from "@/components/ui/button"
 
 export function UserBadge() {
-  const { data: session } = useSession()
+  const { session, signOut } = useAuth()
 
   if (!session?.user) return null
 
