@@ -39,11 +39,22 @@ async function main() {
     console.log(`Admin user created: ${adminEmail}`)
   }
 
+  // Get the user
+  const user = await prisma.user.findUnique({
+    where: { email: adminEmail },
+  })
+
+  if (!user) {
+    console.error(`User not found: ${adminEmail}`)
+    process.exit(1)
+  }
+
   // Create or update account with password
+  // Note: better-auth expects accountId to be user.id for credential provider
   const existingAccount = await prisma.account.findFirst({
     where: {
       providerId: "credential",
-      accountId: adminEmail,
+      accountId: user.id,
     },
   })
 
@@ -54,22 +65,15 @@ async function main() {
     })
     console.log(`Account password updated for: ${adminEmail}`)
   } else {
-    // Get the user we just created
-    const user = await prisma.user.findUnique({
-      where: { email: adminEmail },
+    await prisma.account.create({
+      data: {
+        accountId: user.id,
+        providerId: "credential",
+        userId: user.id,
+        password: hashedPassword,
+      },
     })
-
-    if (user) {
-      await prisma.account.create({
-        data: {
-          accountId: adminEmail,
-          providerId: "credential",
-          userId: user.id,
-          password: hashedPassword,
-        },
-      })
-      console.log(`Account created for: ${adminEmail}`)
-    }
+    console.log(`Account created for: ${adminEmail}`)
   }
 }
 

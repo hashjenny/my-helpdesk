@@ -101,14 +101,6 @@ import { Card } from "@/components/ui/card"
 - User: postgres / toor
 - Prisma migrations applied
 
-### E2E Testing
-
-- Playwright with test directory: `./e2e`
-- Independent test database (`helpdesk_test`) - not deleted after tests
-- Setup: `global-setup.ts` creates database, pushes schema, seeds admin user
-- Teardown: `global-teardown.ts` cleans test data via Prisma, preserves database
-- Rate limiting disabled in non-production environments
-
 ### Running Services
 
 - Frontend: <http://localhost:5173>
@@ -117,3 +109,17 @@ import { Card } from "@/components/ui/card"
 ### Implementation Plan
 
 See `plan.md` for full feature breakdown across 8 phases.
+
+## Agents
+
+### Playwright E2E Writer Agent
+
+**Use this agent** when the user asks to:
+- Write, create, or add E2E tests
+- Modify or extend existing E2E tests
+- Set up test fixtures or page objects
+- Run or verify E2E tests
+
+**Command:** `/playwright` or invoke via `Task` tool with `playwright-e2e-writer` subagent
+
+**Test files:** `./e2e/` directory

@@ -4,8 +4,9 @@ const DATABASE_URL = 'postgresql://postgres:toor@localhost:5432/helpdesk_test'
 
 async function globalSetup() {
   // Create test database if it doesn't exist using psql with password
+  const psqlPath = '/Library/PostgreSQL/18/bin/psql'
   execSync(
-    'PGPASSWORD=toor psql -U postgres -h localhost -tc "SELECT 1 FROM pg_database WHERE datname = \'helpdesk_test\'" | grep -q 1 || PGPASSWORD=toor psql -U postgres -h localhost -c "CREATE DATABASE helpdesk_test"',
+    `PGPASSWORD=toor ${psqlPath} -U postgres -h localhost -tc "SELECT 1 FROM pg_database WHERE datname = 'helpdesk_test'" | grep -q 1 || PGPASSWORD=toor ${psqlPath} -U postgres -h localhost -c "CREATE DATABASE helpdesk_test"`,
     { stdio: 'pipe' }
   )
 

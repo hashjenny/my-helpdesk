@@ -31,7 +31,7 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
-  reporter: process.env.CI ? [["list"], ["json", { outputFile: "test-results/results.json" }]] : "list",
+  reporter: process.env.CI ? [["list"], ["json", { outputFile: "e2e/test-results/results.json" }]] : [["list"], ["html", { outputFile: path.join(__dirname, "e2e", "playwright-report") }]],
   timeout: 30000,
   use: {
     baseURL: "http://localhost:5173",
@@ -41,6 +41,7 @@ export default defineConfig({
     actionTimeout: 10000,
     navigationTimeout: 30000,
   },
+  outputDir: 'e2e/test-results',
   globalSetup: './e2e/global-setup.ts',
   globalTeardown: './e2e/global-teardown.ts',
   projects: [
@@ -51,7 +52,7 @@ export default defineConfig({
   ],
   webServer: [
     {
-      command: "npm run build && node dist/index.js",
+      command: "npm run dev",
       cwd: "./backend",
       url: "http://localhost:3001/api/health",
       reuseExistingServer: !process.env.CI,
