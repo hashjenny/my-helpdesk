@@ -8,7 +8,7 @@ When asking about libraries, frameworks, SDKs, APIs, or CLI tools — **always u
 
 ## Tech Stack
 
-- Frontend: React 19 + TypeScript + Vite + React Router + Tailwind CSS + shadcn/ui
+- Frontend: React 19 + TypeScript + Vite + React Router + Tailwind CSS + shadcn/ui + **TanStack Query** + **Axios**
 - Backend: Express + TypeScript + Node.js
 - Database: PostgreSQL + Prisma 5
 - Auth: Better Auth with bcrypt password hashing
@@ -48,6 +48,23 @@ import { Card } from "@/components/ui/card"
 - Frontend: `frontend/src/`
 - Backend: `backend/src/`
 - Prisma schema: `backend/prisma/schema.prisma`
+- API module: `frontend/src/lib/api/users.ts` (Axios)
+- Query client: `frontend/src/lib/query-client.ts` (TanStack Query)
+
+## Frontend Data Fetching
+
+API calls use **Axios** via `frontend/src/lib/api/users.ts`:
+- `fetchUsers(params)` - GET with pagination/search
+- `createUser(data, token)` - POST
+- `updateUser(id, data, token)` - PATCH
+- `deleteUser(id, token)` - DELETE
+
+State management uses **TanStack Query**:
+- `useQuery` for fetching lists with automatic caching
+- `useMutation` for create/update/delete with `queryClient.invalidateQueries`
+- QueryClientProvider wraps App in `App.tsx`
+
+Type-only imports use `import type { User }` (verbatimModuleSyntax enabled)
 
 ## Project Status
 

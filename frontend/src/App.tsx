@@ -1,4 +1,6 @@
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
+import { QueryClientProvider } from '@tanstack/react-query'
+import { queryClient } from './lib/query-client'
 import { AuthProvider } from './context/AuthContext'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { UserBadge } from './components/UserBadge'
@@ -9,12 +11,13 @@ import { Users } from './pages/Users'
 
 function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <BrowserRouter>
         <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="flex h-16 items-center justify-between px-6">
             <div className="flex items-center gap-6">
-              <h1 className="text-xl font-bold">Helpdesk</h1>
+              <h1 className="text-xl font-bold"><Link to="/">Helpdesk</Link></h1>
               <nav className="flex gap-4">
                 <Link to="/tickets" className="text-sm hover:underline">Tickets</Link>
                 <Link to="/users" className="text-sm hover:underline">Users</Link>
@@ -71,7 +74,8 @@ function App() {
           </Routes>
         </main>
       </BrowserRouter>
-    </AuthProvider>
+      </AuthProvider>
+    </QueryClientProvider>
   )
 }
 

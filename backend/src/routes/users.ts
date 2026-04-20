@@ -14,24 +14,61 @@ const createUserSchema = z.object({
   role: z.enum(["AGENT", "ADMIN"]).optional(),
 })
 
+const updateUserSchema = z.object({
+  name: z.string().min(1, "Name is required").max(100, "Name too long").optional(),
+  role: z.enum(["AGENT", "ADMIN"]).optional(),
+})
+
 const changePasswordSchema = z.object({
   newPassword: z.string().min(6, "Password must be at least 6 characters"),
 })
 
 // GET /users - List all agents (admin only)
-router.get("/", requireAuth, requireRole("ADMIN"), async (_req, res) => {
+router.get("/", requireAuth, requireRole("ADMIN"), async (req, res) => {
   try {
-    const users = await prisma.user.findMany({
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        role: true,
-        createdAt: true,
-      },
-      orderBy: { createdAt: "desc" },
+    const page = Math.max(1, parseInt(req.query.page as string) || 1)
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string) || 10))
+    const skip = (page - 1) * limit
+    const search = req.query.search as string | undefined
+    const role = req.query.role as string | undefined
+
+    const where: any = {}
+
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: "insensitive" } },
+        { email: { contains: search, mode: "insensitive" } },
+      ]
+    }
+
+    if (role && (role === "ADMIN" || role === "AGENT")) {
+      where.role = role
+    }
+
+    const [users, total] = await Promise.all([
+      prisma.user.findMany({
+        where,
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          role: true,
+          createdAt: true,
+        },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: limit,
+      }),
+      prisma.user.count({ where }),
+    ])
+
+    res.json({
+      users,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
     })
-    res.json(users)
   } catch (_error) {
     res.status(500).json({ error: "Failed to fetch users" })
   }
@@ -97,6 +134,50 @@ router.delete("/:id", requireAuth, requireRole("ADMIN"), async (req, res) => {
     res.status(204).send()
   } catch (_error) {
     res.status(500).json({ error: "Failed to delete user" })
+  }
+})
+
+// PATCH /users/:id - Update user (admin only)
+router.patch("/:id", requireAuth, requireRole("ADMIN"), async (req, res) => {
+  const id = req.params.id as string
+
+  if (id === req.user?.id) {
+    res.status(400).json({ error: "Cannot modify your own role" })
+    return
+  }
+
+  const result = updateUserSchema.safeParse(req.body)
+  if (!result.success) {
+    const errorMessage = result.error.errors[0]?.message ?? "Validation failed"
+    res.status(400).json({ error: errorMessage })
+    return
+  }
+
+  const { name, role } = result.data
+
+  if (!name && !role) {
+    res.status(400).json({ error: "No fields to update" })
+    return
+  }
+
+  try {
+    const user = await prisma.user.update({
+      where: { id },
+      data: {
+        ...(name && { name }),
+        ...(role && { role }),
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        createdAt: true,
+      },
+    })
+    res.json(user)
+  } catch (_error) {
+    res.status(500).json({ error: "Failed to update user" })
   }
 })
 
