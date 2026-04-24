@@ -54,12 +54,14 @@ import { Card } from "@/components/ui/card"
 ## Frontend Data Fetching
 
 API calls use **Axios** via `frontend/src/lib/api/users.ts`:
+
 - `fetchUsers(params)` - GET with pagination/search
 - `createUser(data, token)` - POST
 - `updateUser(id, data, token)` - PATCH
 - `deleteUser(id, token)` - DELETE
 
 State management uses **TanStack Query**:
+
 - `useQuery` for fetching lists with automatic caching
 - `useMutation` for create/update/delete with `queryClient.invalidateQueries`
 - QueryClientProvider wraps App in `App.tsx`
@@ -106,9 +108,9 @@ Type-only imports use `import type { User }` (verbatimModuleSyntax enabled)
 
 ### Test Users
 
-- Admin: admin@helpdesk.com (password via ADMIN_PASSWORD env)
-- Agent: agent@desk.com / toor
-- E2E Test Admin: admin@test.com / testpass123
+- Admin: <admin@helpdesk.com> (password via ADMIN_PASSWORD env)
+- Agent: <agent@desk.com> / toor
+- E2E Test Admin: <admin@test.com> / testpass123
 
 ### Database
 
@@ -132,6 +134,7 @@ See `plan.md` for full feature breakdown across 8 phases.
 ### Playwright E2E Writer Agent
 
 **Use this agent** when the user asks to:
+
 - Write, create, or add E2E tests
 - Modify or extend existing E2E tests
 - Set up test fixtures or page objects
