@@ -17,6 +17,7 @@
     "noPropertyAccessFromIndexSignature": false,
     "esModuleInterop": true,
     "resolveJsonModule": true,
+    "rootDir": "./src",
     "outDir": "./dist",
     "types": ["node"]
   },

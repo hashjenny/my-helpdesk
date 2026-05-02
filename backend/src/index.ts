@@ -2,8 +2,8 @@ import express from "express"
 import cors from "cors"
 import rateLimit from "express-rate-limit"
 import { toNodeHandler } from "better-auth/node"
-import { auth } from "./auth"
-import usersRouter from "./routes/users"
+import { auth } from "./auth.js"
+import usersRouter from "./routes/users.js"
 
 const app = express()
 
@@ -18,11 +18,13 @@ const authLimiter = process.env.NODE_ENV === "production"
   : (_req: express.Request, res: express.Response, next: express.NextFunction) => next()
 
 // CORS configuration with proper fallback
-const trustedOrigins = process.env.TRUSTED_ORIGINS
+const trustedOriginsFromEnv = process.env.TRUSTED_ORIGINS
   ?.split(",")
   .map((s) => s.trim())
-  .filter(Boolean) ||
-  (process.env.NODE_ENV === "development" ? ["http://localhost:5173"] : [])
+  .filter(Boolean) ?? []
+const trustedOrigins = trustedOriginsFromEnv.length > 0
+  ? trustedOriginsFromEnv
+  : (process.env.NODE_ENV === "production" ? [] : ["http://localhost:5173"])
 
 app.use(cors({
   origin: trustedOrigins,

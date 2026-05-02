@@ -6,7 +6,7 @@ async function globalTeardown() {
   // Clean up test data using Prisma script (keep database intact)
   // Use npx to run tsx from backend directory
   execSync('npx tsx backend/e2e-cleanup.ts', {
-    cwd: '/Users/johnwick/Lecture/mosh-claude-code/my-helpdesk',
+    cwd: '/Users/johnwick/Code/my-helpdesk',
     env: {
       ...process.env,
       DATABASE_URL,

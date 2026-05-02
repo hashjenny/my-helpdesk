@@ -47,27 +47,9 @@ import { Card } from "@/components/ui/card"
 
 - Frontend: `frontend/src/`
 - Backend: `backend/src/`
-- Shared: `shared/` (schemas and types shared between frontend and backend)
 - Prisma schema: `backend/prisma/schema.prisma`
 - API module: `frontend/src/lib/api/users.ts` (Axios)
 - Query client: `frontend/src/lib/query-client.ts` (TanStack Query)
-
-### Shared Schemas (`shared/`)
-
-Zod schemas and types shared between frontend and backend via the `shared/` package:
-
-```typescript
-import { createUserSchema, updateUserSchema, Role, type UserRole } from "shared"
-```
-
-Available exports:
-- `Role` - enum with `ADMIN` and `AGENT` values
-- `UserRole` - TypeScript type for role values
-- `createUserSchema` - Zod schema for user creation
-- `updateUserSchema` - Zod schema for user updates
-- `changePasswordSchema` - Zod schema for password changes
-
-Import from `"shared"` in both frontend and backend.
 
 ## Frontend Data Fetching
 
@@ -85,36 +67,6 @@ State management uses **TanStack Query**:
 - QueryClientProvider wraps App in `App.tsx`
 
 Type-only imports use `import type { User }` (verbatimModuleSyntax enabled)
-
-### Form Validation
-
-Forms use **React Hook Form** + **Zod** for validation. Zod schemas are shared between frontend and backend via the `shared/` package:
-
-```tsx
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
-import { createUserSchema } from "shared"
-
-type CreateUserForm = z.infer<typeof createUserSchema>
-
-export function MyForm() {
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<CreateUserForm>({
-    resolver: zodResolver(createUserSchema),
-    defaultValues: { role: "AGENT" },
-  })
-
-  const onSubmit = (data: CreateUserForm) => { /* ... */ }
-
-  return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <Input {...register("email")} aria-invalid={!!errors.email} />
-      {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
-      {/* ... */}
-    </form>
-  )
-}
-```
 
 ## Project Status
 

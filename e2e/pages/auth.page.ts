@@ -86,6 +86,8 @@ export class AuthPage {
     await this.gotoLogin()
     await this.fillLoginForm(email, password)
     await this.submitLogin()
+    await this.page.waitForURL('http://localhost:5173/', { timeout: 10000 })
+    await this.page.waitForLoadState('networkidle')
   }
 
   /**

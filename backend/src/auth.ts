@@ -1,9 +1,19 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import { PrismaClient } from "@prisma/client";
+import { createAuthMiddleware, APIError } from "better-auth/api";
 import bcrypt from "bcrypt";
+import { prisma } from "./lib/prisma.js";
 
-const prisma = new PrismaClient();
+const trustedOriginsFromEnv = process.env.TRUSTED_ORIGINS
+  ?.split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean) ?? [];
+const defaultTrustedOrigins = process.env.NODE_ENV === "production"
+  ? []
+  : ["http://localhost:5173"];
+const trustedOrigins = trustedOriginsFromEnv.length > 0
+  ? trustedOriginsFromEnv
+  : defaultTrustedOrigins;
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -12,7 +22,7 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 6,
-    disableSignUp: true,
+    disableSignUp: false,
     password: {
       hash: async (password) => bcrypt.hash(password, 10),
       verify: async ({ hash, password }) => bcrypt.compare(password, hash),
@@ -32,5 +42,36 @@ export const auth = betterAuth({
       },
     },
   },
-  trustedOrigins: process.env.TRUSTED_ORIGINS?.split(",").map(s => s.trim()) || [],
+  databaseHooks: {
+    user: {
+      delete: {
+        after: async (user) => {
+          await prisma.session.deleteMany({
+            where: { userId: user.id },
+          });
+        },
+      },
+    },
+  },
+  hooks: {
+    before: createAuthMiddleware(async (ctx) => {
+      if (!ctx.path?.endsWith("/sign-in/email")) {
+        return;
+      }
+      const email = ctx.body?.email as string | undefined;
+      if (!email) {
+        return;
+      }
+      const user = await prisma.user.findUnique({
+        where: { email },
+        select: { deletedAt: true },
+      });
+      if (user?.deletedAt) {
+        throw new APIError("BAD_REQUEST", {
+          message: "This account has been deleted",
+        });
+      }
+    }),
+  },
+  trustedOrigins,
 });

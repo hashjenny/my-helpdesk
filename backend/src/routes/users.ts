@@ -1,30 +1,13 @@
 import { Router } from "express"
-import { PrismaClient } from "@prisma/client"
 import bcrypt from "bcrypt"
-import { z } from "zod"
-import { requireAuth, requireRole } from "../middleware/session"
+import { prisma } from "../lib/prisma.js"
+import { requireAuth, requireRole } from "../middleware/session.js"
+import { createUserSchema, updateUserSchema, changePasswordSchema, isUserRole, Role } from "shared"
 
 const router = Router()
-const prisma = new PrismaClient()
-
-const createUserSchema = z.object({
-  email: z.string().email("Invalid email format"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  name: z.string().min(1, "Name is required").max(100, "Name too long"),
-  role: z.enum(["AGENT", "ADMIN"]).optional(),
-})
-
-const updateUserSchema = z.object({
-  name: z.string().min(1, "Name is required").max(100, "Name too long").optional(),
-  role: z.enum(["AGENT", "ADMIN"]).optional(),
-})
-
-const changePasswordSchema = z.object({
-  newPassword: z.string().min(6, "Password must be at least 6 characters"),
-})
 
 // GET /users - List all agents (admin only)
-router.get("/", requireAuth, requireRole("ADMIN"), async (req, res) => {
+router.get("/", requireAuth, requireRole(Role.ADMIN), async (req, res) => {
   try {
     const page = Math.max(1, parseInt(req.query.page as string) || 1)
     const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string) || 10))
@@ -32,7 +15,7 @@ router.get("/", requireAuth, requireRole("ADMIN"), async (req, res) => {
     const search = req.query.search as string | undefined
     const role = req.query.role as string | undefined
 
-    const where: any = {}
+    const where: any = { deletedAt: null }
 
     if (search) {
       where.OR = [
@@ -41,7 +24,7 @@ router.get("/", requireAuth, requireRole("ADMIN"), async (req, res) => {
       ]
     }
 
-    if (role && (role === "ADMIN" || role === "AGENT")) {
+    if (role && isUserRole(role)) {
       where.role = role
     }
 
@@ -75,7 +58,7 @@ router.get("/", requireAuth, requireRole("ADMIN"), async (req, res) => {
 })
 
 // POST /users - Create a new agent (admin only)
-router.post("/", requireAuth, requireRole("ADMIN"), async (req, res) => {
+router.post("/", requireAuth, requireRole(Role.ADMIN), async (req, res) => {
   const result = createUserSchema.safeParse(req.body)
 
   if (!result.success) {
@@ -85,30 +68,36 @@ router.post("/", requireAuth, requireRole("ADMIN"), async (req, res) => {
   }
 
   const { email, password, name, role } = result.data
-  const userRole = role === "ADMIN" ? "ADMIN" : "AGENT"
+  const userRole = role ?? Role.AGENT
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10)
-    const user = await prisma.user.create({
-      data: {
-        email,
-        name,
-        role: userRole as "ADMIN" | "AGENT",
-        accounts: {
-          create: {
-            accountId: email,
-            providerId: "credential",
-            password: hashedPassword,
-          },
+    const user = await prisma.$transaction(async (tx) => {
+      const createdUser = await tx.user.create({
+        data: {
+          email,
+          name,
+          role: userRole,
         },
-      },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        role: true,
-        createdAt: true,
-      },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          role: true,
+          createdAt: true,
+        },
+      })
+
+      await tx.account.create({
+        data: {
+          accountId: createdUser.id,
+          providerId: "credential",
+          userId: createdUser.id,
+          password: hashedPassword,
+        },
+      })
+
+      return createdUser
     })
     res.status(201).json(user)
   } catch (error) {
@@ -120,8 +109,8 @@ router.post("/", requireAuth, requireRole("ADMIN"), async (req, res) => {
   }
 })
 
-// DELETE /users/:id - Delete a user (admin only)
-router.delete("/:id", requireAuth, requireRole("ADMIN"), async (req, res) => {
+// DELETE /users/:id - Soft delete a user (admin only)
+router.delete("/:id", requireAuth, requireRole(Role.ADMIN), async (req, res) => {
   const id = req.params.id as string
 
   if (id === req.user?.id) {
@@ -129,8 +118,33 @@ router.delete("/:id", requireAuth, requireRole("ADMIN"), async (req, res) => {
     return
   }
 
+  // Prevent deleting admins
+  const userToDelete = await prisma.user.findUnique({
+    where: { id },
+    select: { role: true, deletedAt: true },
+  })
+
+  if (!userToDelete || userToDelete.deletedAt) {
+    res.status(404).json({ error: "User not found" })
+    return
+  }
+
+  if (userToDelete.role === Role.ADMIN) {
+    res.status(400).json({ error: "Cannot delete an admin user" })
+    return
+  }
+
   try {
-    await prisma.user.delete({ where: { id } })
+    await prisma.$transaction([
+      prisma.user.update({
+        where: { id },
+        data: { deletedAt: new Date() },
+      }),
+      // Delete all sessions for this user to force logout
+      prisma.session.deleteMany({
+        where: { userId: id },
+      }),
+    ])
     res.status(204).send()
   } catch (_error) {
     res.status(500).json({ error: "Failed to delete user" })
@@ -138,7 +152,7 @@ router.delete("/:id", requireAuth, requireRole("ADMIN"), async (req, res) => {
 })
 
 // PATCH /users/:id - Update user (admin only)
-router.patch("/:id", requireAuth, requireRole("ADMIN"), async (req, res) => {
+router.patch("/:id", requireAuth, requireRole(Role.ADMIN), async (req, res) => {
   const id = req.params.id as string
 
   if (id === req.user?.id) {
@@ -153,14 +167,38 @@ router.patch("/:id", requireAuth, requireRole("ADMIN"), async (req, res) => {
     return
   }
 
-  const { name, role } = result.data
+  const { name, role, password } = result.data
 
-  if (!name && !role) {
+  if (!name && !role && !password) {
     res.status(400).json({ error: "No fields to update" })
     return
   }
 
   try {
+    // If password is being changed, use the separate password endpoint logic
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password, 10)
+      const account = await prisma.account.findFirst({
+        where: { userId: id, providerId: "credential" },
+      })
+
+      if (account) {
+        await prisma.$transaction([
+          prisma.account.update({
+            where: { id: account.id },
+            data: { password: hashedPassword },
+          }),
+          prisma.user.update({
+            where: { id },
+            data: { passwordVersion: { increment: 1 } },
+          }),
+          prisma.session.deleteMany({
+            where: { userId: id },
+          }),
+        ])
+      }
+    }
+
     const user = await prisma.user.update({
       where: { id },
       data: {
@@ -187,7 +225,7 @@ router.get("/me", requireAuth, async (req, res) => {
 })
 
 // PATCH /users/:id/password - Change user password and invalidate sessions (admin only)
-router.patch("/:id/password", requireAuth, requireRole("ADMIN"), async (req, res) => {
+router.patch("/:id/password", requireAuth, requireRole(Role.ADMIN), async (req, res) => {
   const id = req.params.id as string
 
   const result = changePasswordSchema.safeParse(req.body)

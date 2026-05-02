@@ -142,16 +142,15 @@ test.describe('Authentication System', () => {
       await expect(authPage.registerLinkToLogin).toBeVisible()
     })
 
-    test('should show error when trying to register (sign-up disabled)', async ({ page }) => {
+    test('should successfully register a new user', async ({ page }) => {
       const uniqueEmail = `newuser${Date.now()}@test.com`
 
       await authPage.gotoRegister()
       await authPage.fillRegisterForm('New Test User', uniqueEmail, 'securepass123', 'securepass123')
       await authPage.submitRegister()
 
-      // Should show error that sign-up is disabled
-      await authPage.expectErrorAlert()
-      await expect(authPage.errorAlert).toContainText(/sign up|not enabled|disabled/i)
+      await page.waitForURL(/\/(login)?$/, { timeout: 5000 }).catch(() => {})
+      await authPage.expectNoErrorAlert()
     })
 
     test('should show error when registering with duplicate email', async ({ page }) => {
@@ -246,7 +245,7 @@ test.describe('Authentication System', () => {
   test.describe('Session / Logout', () => {
     // These tests require successful login which has a known issue in test environment
     // The login API works correctly, but the E2E test setup has issues with session/cookie handling
-    test.skip('should successfully logout and redirect to login', async ({ page }) => {
+    test('should successfully logout and redirect to login', async ({ page }) => {
       await authPage.login(TEST_ADMIN.email, TEST_ADMIN.password)
       await page.waitForURL('/', { timeout: 5000 })
       await page.waitForLoadState('networkidle')
@@ -257,7 +256,7 @@ test.describe('Authentication System', () => {
       await expect(page).toHaveURL(/\/login/, { timeout: 5000 })
     })
 
-    test.skip('should access protected route after successful login', async ({ page }) => {
+    test('should access protected route after successful login', async ({ page }) => {
       await authPage.login(TEST_ADMIN.email, TEST_ADMIN.password)
       await page.waitForURL('/', { timeout: 5000 })
       await page.waitForLoadState('networkidle')
@@ -278,7 +277,7 @@ test.describe('Authentication System', () => {
       await expect(page).toHaveURL(/\/login/)
     })
 
-    test.skip('should remember login state after page reload', async ({ page }) => {
+    test('should remember login state after page reload', async ({ page }) => {
       await authPage.login(TEST_ADMIN.email, TEST_ADMIN.password)
       await page.waitForURL('/', { timeout: 5000 })
       await page.waitForLoadState('networkidle')

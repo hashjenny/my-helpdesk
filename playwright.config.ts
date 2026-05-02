@@ -24,17 +24,26 @@ function parseEnvFile(filePath: string): Record<string, string> {
 
 const envTestPath = path.join(__dirname, ".env.test");
 const envVars = fs.existsSync(envTestPath) ? parseEnvFile(envTestPath) : {};
+const apiBaseUrl = envVars.BETTER_AUTH_URL || `http://localhost:${envVars.PORT || "3001"}`;
+const apiPort = (() => {
+  try {
+    return new URL(apiBaseUrl).port || envVars.PORT || "3001";
+  } catch {
+    return envVars.PORT || "3001";
+  }
+})();
+const frontendBaseUrl = envVars.TRUSTED_ORIGINS?.split(",")[0]?.trim() || "http://localhost:5173";
 
 export default defineConfig({
   testDir: "./e2e",
-  fullyParallel: true,
+  fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  workers: 1,
   reporter: process.env.CI ? [["list"], ["json", { outputFile: "e2e/test-results/results.json" }]] : [["list"], ["html", { outputFile: path.join(__dirname, "e2e", "playwright-report") }]],
   timeout: 30000,
   use: {
-    baseURL: "http://localhost:5173",
+    baseURL: frontendBaseUrl,
     trace: "on-first-retry",
     screenshot: "only-on-failure",
     video: "on-first-retry",
@@ -54,24 +63,24 @@ export default defineConfig({
     {
       command: "npm run dev",
       cwd: "./backend",
-      url: "http://localhost:3001/api/health",
+      url: `${apiBaseUrl}/api/health`,
       reuseExistingServer: !process.env.CI,
       timeout: 120 * 1000,
       env: {
         ...envVars,
-        PORT: "3001",
+        PORT: apiPort,
         NODE_ENV: "test",
       },
     },
     {
       command: "npm run dev",
       cwd: "./frontend",
-      url: "http://localhost:5173",
+      url: frontendBaseUrl,
       reuseExistingServer: !process.env.CI,
       timeout: 120 * 1000,
       env: {
         NODE_ENV: "test",
-        VITE_API_URL: "http://localhost:3001",
+        VITE_API_URL: apiBaseUrl,
       },
     },
   ],

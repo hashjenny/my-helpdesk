@@ -1,9 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, within } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
+import { render, screen } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AdminUsers } from '../pages/AdminUsers'
-import { AuthProvider } from '../context/AuthContext'
+import { AuthContext } from '@/context/auth-context'
 
 const mockUsers = [
   { id: '1', name: 'John Doe', email: 'john@example.com', role: 'ADMIN', createdAt: '2024-01-01' },
@@ -12,7 +11,13 @@ const mockUsers = [
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
+    defaultOptions: {
+      queries: {
+        retry: false,
+        refetchOnMount: false,
+        refetchOnWindowFocus: false,
+      },
+    },
   })
   const mockSession = {
     user: { id: '1', name: 'Admin', email: 'admin@test.com', role: 'ADMIN' },
@@ -21,9 +26,9 @@ const createWrapper = () => {
 
   const Wrapper = ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
+      <AuthContext.Provider value={{ session: mockSession, isPending: false, signOut: vi.fn() }}>
         {children}
-      </AuthProvider>
+      </AuthContext.Provider>
     </QueryClientProvider>
   )
 

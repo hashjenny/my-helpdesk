@@ -1,6 +1,10 @@
 import { PrismaClient } from "@prisma/client"
 import bcrypt from "bcrypt"
-import { Role } from "../src/types/role"
+import { Role } from "shared"
+
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const prisma = new PrismaClient()
 

@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { signUp } from "../lib/auth-client"
+import { getErrorMessage } from "@/lib/get-error-message"
 import { Link } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -55,8 +56,8 @@ export function Register() {
           },
         }
       )
-    } catch (err: any) {
-      setError(err?.message || "An unexpected error occurred")
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, "An unexpected error occurred"))
       setLoading(false)
     }
   }

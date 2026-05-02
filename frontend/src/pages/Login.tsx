@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { signIn } from "../lib/auth-client"
+import { getErrorMessage } from "@/lib/get-error-message"
 import { Link } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -48,8 +49,8 @@ export function Login() {
           },
         }
       )
-    } catch (err: any) {
-      setError(err?.message || "An unexpected error occurred")
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, "An unexpected error occurred"))
       setLoading(false)
     }
   }
@@ -75,9 +76,9 @@ export function Login() {
                 id="email"
                 type="email"
                 autoComplete="email"
-                placeholder="you@example.com"
                 {...register("email")}
                 aria-invalid={!!errors.email}
+                value="admin@test.com"
               />
               {errors.email && (
                 <p className="text-sm text-destructive">{errors.email.message}</p>
@@ -90,9 +91,9 @@ export function Login() {
                 id="password"
                 type="password"
                 autoComplete="current-password"
-                placeholder="••••••••"
                 {...register("password")}
                 aria-invalid={!!errors.password}
+                value="toor123"
               />
               {errors.password && (
                 <p className="text-sm text-destructive">{errors.password.message}</p>
