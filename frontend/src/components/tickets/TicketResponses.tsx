@@ -22,7 +22,9 @@ export function TicketResponses({ responses }: TicketResponsesProps) {
             <div className="flex gap-3">
               <div className="flex-1">
                 <div className="flex items-center gap-2">
-                  <span className="font-medium">Agent</span>
+                  <span className={`font-medium ${response.isCustomerReply ? "text-blue-600" : "text-gray-900"}`}>
+                    {response.isCustomerReply ? "Customer" : "Agent"}
+                  </span>
                   <span className="text-xs text-muted-foreground">
                     {new Date(response.createdAt).toLocaleString()}
                   </span>
