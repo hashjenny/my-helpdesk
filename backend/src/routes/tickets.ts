@@ -40,7 +40,10 @@ router.get("/", requireAuth, async (req, res) => {
       return
     }
 
-    const result = await ticketService.list({ page, limit, status, category, search, sortBy, sortOrder })
+    const userId = req.user?.id
+    const userRole = req.user?.role
+
+    const result = await ticketService.list({ page, limit, status, category, search, sortBy, sortOrder, userId, userRole })
     res.json(result)
   } catch (_error) {
     res.status(500).json({ error: "Failed to fetch tickets" })
@@ -69,6 +72,11 @@ router.get("/:id", requireAuth, async (req, res) => {
   const ticket = await ticketService.getById(req.params.id as string)
   if (!ticket) {
     res.status(404).json({ error: "Ticket not found" })
+    return
+  }
+  // Agents can only see tickets assigned to them
+  if (req.user?.role === "AGENT" && ticket.assignedTo !== req.user?.id) {
+    res.status(403).json({ error: "Access denied" })
     return
   }
   res.json(ticket)

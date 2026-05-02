@@ -224,6 +224,24 @@ router.get("/me", requireAuth, async (req, res) => {
   res.json(req.user)
 })
 
+// GET /users/agents - List all agents (for assignment dropdown)
+router.get("/agents", requireAuth, async (req, res) => {
+  try {
+    const agents = await prisma.user.findMany({
+      where: { deletedAt: null, role: "AGENT" },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+      },
+      orderBy: { name: "asc" },
+    })
+    res.json(agents)
+  } catch (_error) {
+    res.status(500).json({ error: "Failed to fetch agents" })
+  }
+})
+
 // PATCH /users/:id/password - Change user password and invalidate sessions (admin only)
 router.patch("/:id/password", requireAuth, requireRole(Role.ADMIN), async (req, res) => {
   const id = req.params.id as string

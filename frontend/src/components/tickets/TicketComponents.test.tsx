@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest"
+import { describe, it, expect, vi } from "vitest"
 import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
@@ -30,9 +30,9 @@ const mockTickets: Ticket[] = [
     status: "OPEN",
     category: "TECHNICAL",
     supportEmail: "user@example.com",
+    assignedTo: null,
     createdAt: new Date("2026-05-01").toISOString(),
     updatedAt: new Date("2026-05-01").toISOString(),
-    createdBy: "user1",
   },
   {
     id: "2",
@@ -41,9 +41,9 @@ const mockTickets: Ticket[] = [
     status: "RESOLVED",
     category: "REFUND",
     supportEmail: null,
+    assignedTo: null,
     createdAt: new Date("2026-05-02").toISOString(),
     updatedAt: new Date("2026-05-02").toISOString(),
-    createdBy: "user2",
   },
 ]
 

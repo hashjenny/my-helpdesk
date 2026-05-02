@@ -81,3 +81,15 @@ export async function deleteUser(id: string, token: string): Promise<void> {
   const instance = createAxiosInstance(token)
   await instance.delete(`/api/users/${id}`)
 }
+
+interface Agent {
+  id: string
+  name: string
+  email: string
+}
+
+export async function fetchAgents(token: string): Promise<Agent[]> {
+  const instance = createAxiosInstance(token)
+  const response = await instance.get("/api/users/agents")
+  return response.data
+}

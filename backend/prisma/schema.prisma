@@ -20,6 +20,7 @@ model User {
   passwordVersion  Int        @default(1)
   accounts         Account[]
   sessions         Session[]
+  assignedTickets   Ticket[]   @relation("AssignedTickets")
 }
 
 enum Role {
@@ -34,10 +35,12 @@ model Ticket {
   status       TicketStatus  @default(OPEN)
   category     TicketCategory @default(GENERAL)
   supportEmail String?
+  assignedTo   String?
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   deletedAt    DateTime?
   responses    TicketResponse[]
+  assignee     User?         @relation("AssignedTickets", fields: [assignedTo], references: [id])
 }
 
 enum TicketStatus {

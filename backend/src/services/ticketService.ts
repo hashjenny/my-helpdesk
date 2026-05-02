@@ -10,8 +10,10 @@ export const ticketService = {
     search?: string
     sortBy?: string
     sortOrder?: string
+    userId?: string
+    userRole?: string
   }) {
-    const { page, limit, status, category, search, sortBy = "createdAt", sortOrder = "desc" } = params
+    const { page, limit, status, category, search, sortBy = "createdAt", sortOrder = "desc", userId, userRole } = params
     const skip = (page - 1) * limit
 
     const where: any = { deletedAt: null }
@@ -22,6 +24,10 @@ export const ticketService = {
         { subject: { contains: search, mode: "insensitive" } },
         { body: { contains: search, mode: "insensitive" } },
       ]
+    }
+    // Agents can only see tickets assigned to them
+    if (userRole === "AGENT" && userId) {
+      where.assignedTo = userId
     }
 
     const [tickets, total] = await Promise.all([
@@ -41,7 +47,10 @@ export const ticketService = {
   async getById(id: string) {
     return prisma.ticket.findUnique({
       where: { id },
-      include: { responses: { orderBy: { createdAt: "asc" } } },
+      include: {
+        responses: { orderBy: { createdAt: "asc" } },
+        assignee: { select: { id: true, name: true, email: true } },
+      },
     })
   },
 
@@ -64,6 +73,7 @@ export const ticketService = {
         ...(data.body && { body: data.body }),
         ...(data.status && { status: data.status }),
         ...(data.category && { category: data.category }),
+        ...("assignedTo" in data && { assignedTo: data.assignedTo }),
       },
     })
   },

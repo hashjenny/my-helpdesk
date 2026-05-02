@@ -58,6 +58,12 @@ export const TicketCategory = ["GENERAL", "TECHNICAL", "REFUND"] as const
 export type TicketCategory = (typeof TicketCategory)[number]
 
 // Ticket interfaces
+export interface TicketAssignee {
+  id: string
+  name: string
+  email: string
+}
+
 export interface Ticket {
   id: string
   subject: string
@@ -65,9 +71,11 @@ export interface Ticket {
   status: TicketStatus
   category: TicketCategory
   supportEmail: string | null
+  assignedTo: string | null
   createdAt: string
   updatedAt: string
   responses?: TicketResponse[]
+  assignee?: TicketAssignee | null
 }
 
 export interface TicketResponse {
@@ -97,6 +105,7 @@ export const updateTicketSchema = z.object({
   body: z.string().min(1).optional(),
   status: z.enum(TicketStatus).optional(),
   category: z.enum(TicketCategory).optional(),
+  assignedTo: z.string().nullable().optional(),
 })
 
 export const createTicketResponseSchema = z.object({
