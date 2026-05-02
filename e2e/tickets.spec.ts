@@ -142,4 +142,25 @@ test.describe('Ticket Management - Core Tests', () => {
     const openBadges = page.locator('span:has-text("OPEN")')
     await expect(openBadges.first()).toBeVisible()
   })
+
+  // ==========================================================================
+  // CORE: Category Filter
+  // ==========================================================================
+
+  test('should filter tickets by category', async ({ page }) => {
+    await authPage.login(TEST_ADMIN.email, TEST_ADMIN.password)
+    await page.goto('/tickets')
+    await page.waitForLoadState('networkidle')
+
+    // Filter by TECHNICAL category (second select)
+    await page.locator('select').nth(1).selectOption('TECHNICAL')
+    await page.waitForLoadState('networkidle')
+
+    // All visible tickets should be TECHNICAL
+    const technicalRows = page.locator('table tbody tr')
+    await expect(technicalRows.first()).toBeVisible()
+    // Verify category column (3rd column) contains Technical
+    const categoryCells = page.locator('table tbody tr td:nth-child(3)')
+    await expect(categoryCells.first()).toContainText('Technical')
+  })
 })
