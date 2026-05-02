@@ -17,8 +17,6 @@ export function TicketList() {
   const [search, setSearch] = useState("")
   const [status, setStatus] = useState("")
   const [category, setCategory] = useState("")
-  const [sortBy, setSortBy] = useState("createdAt")
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
 
   // Pagination
   const [page, setPage] = useState(1)
@@ -29,8 +27,8 @@ export function TicketList() {
 
   // Fetch tickets
   const { data, isLoading, error } = useQuery({
-    queryKey: ["tickets", page, limit, search, status, category, sortBy, sortOrder],
-    queryFn: () => fetchTickets({ page, limit, search, status, category, sortBy, sortOrder, token }),
+    queryKey: ["tickets", page, limit, search, status, category],
+    queryFn: () => fetchTickets({ page, limit, search, status, category, token }),
     enabled: Boolean(token),
   })
 
@@ -68,16 +66,6 @@ export function TicketList() {
     setPage(1)
   }
 
-  const handleSortChange = (value: string) => {
-    setSortBy(value)
-    setPage(1)
-  }
-
-  const handleSortOrderToggle = () => {
-    setSortOrder(sortOrder === "asc" ? "desc" : "asc")
-    setPage(1)
-  }
-
   const handleDelete = (id: string) => {
     if (confirm("Are you sure you want to delete this ticket?")) {
       deleteMutation.mutate(id)
@@ -111,13 +99,9 @@ export function TicketList() {
         search={search}
         status={status}
         category={category}
-        sortBy={sortBy}
-        sortOrder={sortOrder}
         onSearchChange={handleSearchChange}
         onStatusChange={handleStatusChange}
         onCategoryChange={handleCategoryChange}
-        onSortChange={handleSortChange}
-        onSortOrderToggle={handleSortOrderToggle}
       />
 
       <TicketTable

@@ -1,10 +1,11 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { signIn } from "../lib/auth-client"
 import { getErrorMessage } from "@/lib/get-error-message"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
+import { useAuth } from "@/hooks/useAuth"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -21,6 +22,8 @@ type LoginForm = z.infer<typeof loginSchema>
 export function Login() {
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
+  const navigate = useNavigate()
+  const { session, isPending } = useAuth()
 
   const {
     register,
@@ -29,6 +32,12 @@ export function Login() {
   } = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
   })
+
+  useEffect(() => {
+    if (!isPending && session) {
+      navigate("/", { replace: true })
+    }
+  }, [session, isPending, navigate])
 
   const onSubmit = async (data: LoginForm) => {
     setError("")
@@ -78,7 +87,6 @@ export function Login() {
                 autoComplete="email"
                 {...register("email")}
                 aria-invalid={!!errors.email}
-                value="admin@test.com"
               />
               {errors.email && (
                 <p className="text-sm text-destructive">{errors.email.message}</p>
@@ -93,7 +101,6 @@ export function Login() {
                 autoComplete="current-password"
                 {...register("password")}
                 aria-invalid={!!errors.password}
-                value="toor123"
               />
               {errors.password && (
                 <p className="text-sm text-destructive">{errors.password.message}</p>

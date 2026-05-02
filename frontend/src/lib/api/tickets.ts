@@ -37,16 +37,14 @@ interface FetchTicketsParams {
   status?: string
   category?: string
   search?: string
-  sortBy?: string
-  sortOrder?: "asc" | "desc"
   token: string
 }
 
 export async function fetchTickets(params: FetchTicketsParams): Promise<TicketsResponse> {
-  const { page, limit, status, category, search, sortBy, sortOrder, token } = params
+  const { page, limit, status, category, search, token } = params
   const instance = createAxiosInstance(token)
   const response = await instance.get("/api/tickets", {
-    params: { page, limit, status, category, search, sortBy, sortOrder },
+    params: { page, limit, status, category, search },
   })
   return response.data
 }

@@ -8,7 +8,7 @@ When asking about libraries, frameworks, SDKs, APIs, or CLI tools — **always u
 
 ## Tech Stack
 
-- Frontend: React 19 + TypeScript + Vite + React Router + Tailwind CSS + shadcn/ui + **TanStack Query** + **Axios**
+- Frontend: React 19 + TypeScript + Vite + React Router + Tailwind CSS + shadcn/ui + **TanStack Query** + **TanStack Table** + **Axios**
 - Backend: Express + TypeScript + Node.js
 - Database: PostgreSQL + Prisma 5
 - Auth: Better Auth with bcrypt password hashing
@@ -167,6 +167,7 @@ export function MyForm() {
 - Protected routes for authenticated users
 - Admin user management panel
 - bcrypt password hashing
+- Login page redirects to home if already authenticated
 
 **Phase 4: Ticket Management** (completed)
 
@@ -176,6 +177,8 @@ export function MyForm() {
 - Frontend ticket list and detail pages
 - Email-to-ticket webhook (`/api/webhooks/email`)
 - `supportEmail` field on tickets for email-originated tickets
+- **Client-side sorting** with TanStack Table (click column headers)
+- **Soft delete** (tickets have `deletedAt` field, filtered by default)
 
 ### Current Phase
 
@@ -194,9 +197,9 @@ export function MyForm() {
 
 ### Test Users
 
-- Admin: <admin@helpdesk.com> (password via ADMIN_PASSWORD env)
+- Admin: <admin@helpdesk.com> / toor123
 - Agent: <agent@desk.com> / toor
-- E2E Test Admin: <admin@test.com> / testpass123
+- E2E Test Admin: <admin@test.com> / toor123
 
 ### Database
 
