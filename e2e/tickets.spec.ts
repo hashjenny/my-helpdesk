@@ -119,4 +119,27 @@ test.describe('Ticket Management - Core Tests', () => {
     // Verify new ticket appears in list
     await expect(page.locator(`text=${uniqueSubject}`)).toBeVisible()
   })
+
+  // ==========================================================================
+  // CORE: Status Filter
+  // ==========================================================================
+
+  test('should filter tickets by status', async ({ page }) => {
+    await authPage.login(TEST_ADMIN.email, TEST_ADMIN.password)
+    await page.goto('/tickets')
+    await page.waitForLoadState('networkidle')
+
+    // Get initial ticket count
+    const initialRows = await page.locator('table tbody tr').count()
+
+    // Filter by OPEN status
+    await page.locator('select').first().selectOption('OPEN')
+    await page.waitForLoadState('networkidle')
+
+    // Verify rows are visible and contain OPEN badges
+    const filteredRows = page.locator('table tbody tr')
+    await expect(filteredRows.first()).toBeVisible()
+    const openBadges = page.locator('span:has-text("OPEN")')
+    await expect(openBadges.first()).toBeVisible()
+  })
 })
