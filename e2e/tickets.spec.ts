@@ -92,4 +92,31 @@ test.describe('Ticket Management - Core Tests', () => {
     const rows = page.locator('table tbody tr')
     await expect(rows.first()).toBeVisible()
   })
+
+  // ==========================================================================
+  // CORE: Create Ticket
+  // ==========================================================================
+
+  test('should create a new ticket', async ({ page }) => {
+    await authPage.login(TEST_ADMIN.email, TEST_ADMIN.password)
+    await page.goto('/tickets')
+    await page.waitForLoadState('networkidle')
+
+    // Open create form
+    await page.locator('button:has-text("New Ticket")').click()
+    await expect(page.locator('text=Create New Ticket')).toBeVisible()
+
+    // Fill form
+    const uniqueSubject = `Test Ticket ${Date.now()}`
+    await page.fill('#subject', uniqueSubject)
+    await page.fill('#body', 'Test description for the ticket')
+    await page.selectOption('#category', 'TECHNICAL')
+
+    // Submit
+    await page.click('button:has-text("Create Ticket")')
+    await page.waitForLoadState('networkidle')
+
+    // Verify new ticket appears in list
+    await expect(page.locator(`text=${uniqueSubject}`)).toBeVisible()
+  })
 })
