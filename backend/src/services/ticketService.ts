@@ -86,9 +86,21 @@ export const ticketService = {
   },
 
   async addResponse(ticketId: string, body: string) {
-    return prisma.ticketResponse.create({
-      data: { ticketId, body },
+    const response = await prisma.ticketResponse.create({
+      data: { ticketId, body, isCustomerReply: false },
     })
+
+    try {
+      const ticket = await this.getById(ticketId)
+      if (ticket?.supportEmail) {
+        const { emailService } = await import("./email.js")
+        await emailService.sendTicketResponseEmail(ticket, response.body)
+      }
+    } catch (error) {
+      console.error("Failed to send ticket response email:", error)
+    }
+
+    return response
   },
 
   async getResponses(ticketId: string) {
