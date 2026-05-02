@@ -246,3 +246,27 @@ See `plan.md` for full feature breakdown across 8 phases.
 **Command:** `/playwright` or invoke via `Task` tool with `playwright-e2e-writer` subagent
 
 **Test files:** `./e2e/` directory
+
+### E2E Test Skip Rule
+
+**若组件测试已覆盖某功能，则跳过对应 E2E 测试。**
+
+例如 `TicketFilters` 组件测试已覆盖搜索和筛选逻辑，则 E2E 不再重复测试该功能。
+
+组件测试位置：`frontend/src/components/**/*.test.tsx`
+
+当前组件测试覆盖：
+
+| 组件 | 状态 |
+|------|------|
+| `TicketFilters` | ✅ 已覆盖搜索、状态/类别筛选 |
+| `TicketTable` | ✅ 已覆盖表格渲染、loading、empty、error、delete |
+| `CreateTicketForm` | ✅ 已覆盖表单字段、提交、取消、pending 状态 |
+| `ReplyForm` | ✅ 已覆盖 textarea、提交按钮、pending 状态 |
+| `EmailBadge` | ✅ 已覆盖渲染/null 情况 |
+
+**E2E 测试应覆盖（组件测试未覆盖）：**
+- 端到端用户流程（登录 → 操作 → 结果）
+- 与真实后端交互的完整 CRUD
+- 页面间导航
+- 排序与真实数据的集成
