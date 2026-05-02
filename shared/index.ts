@@ -49,3 +49,61 @@ export type ChangePasswordInput = z.infer<typeof changePasswordSchema>
 export function isUserRole(value: string): value is UserRole {
   return UserRole.includes(value as UserRole)
 }
+
+// Ticket Status & Category
+export const TicketStatus = ["OPEN", "RESOLVED", "CLOSED"] as const
+export type TicketStatus = (typeof TicketStatus)[number]
+
+export const TicketCategory = ["GENERAL", "TECHNICAL", "REFUND"] as const
+export type TicketCategory = (typeof TicketCategory)[number]
+
+// Ticket interfaces
+export interface Ticket {
+  id: string
+  subject: string
+  body: string
+  status: TicketStatus
+  category: TicketCategory
+  supportEmail: string | null
+  createdAt: string
+  updatedAt: string
+  responses?: TicketResponse[]
+}
+
+export interface TicketResponse {
+  id: string
+  ticketId: string
+  body: string
+  createdAt: string
+}
+
+export interface TicketsResponse {
+  tickets: Ticket[]
+  total: number
+  page: number
+  totalPages: number
+}
+
+// Ticket Zod schemas
+export const createTicketSchema = z.object({
+  subject: z.string().min(1, "Subject is required").max(200, "Subject too long"),
+  body: z.string().min(1, "Body is required"),
+  category: z.enum(TicketCategory).default("GENERAL"),
+  supportEmail: z.string().email().optional(),
+})
+
+export const updateTicketSchema = z.object({
+  subject: z.string().min(1).max(200).optional(),
+  body: z.string().min(1).optional(),
+  status: z.enum(TicketStatus).optional(),
+  category: z.enum(TicketCategory).optional(),
+})
+
+export const createTicketResponseSchema = z.object({
+  body: z.string().min(1, "Response body is required"),
+})
+
+export type CreateTicketInput = z.input<typeof createTicketSchema>
+export type CreateTicket = z.output<typeof createTicketSchema>
+export type UpdateTicketInput = z.infer<typeof updateTicketSchema>
+export type CreateTicketResponseInput = z.infer<typeof createTicketResponseSchema>

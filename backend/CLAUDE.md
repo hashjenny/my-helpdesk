@@ -28,7 +28,14 @@ This backend uses Express with TypeScript running on Node.js.
 ### Project Structure
 
 - Entry point: `src/index.ts`
-- Routes: `src/routes/`
-- Middleware: `src/middleware/`
+- Routes: `src/routes/` (users.ts, tickets.ts, email.ts)
+- Services: `src/services/` (ticketService.ts, email.ts)
+- Middleware: `src/middleware/session.ts`
 - Auth config: `src/auth.ts`
 - Database: PostgreSQL via Prisma
+
+### API Routes
+
+- `/api/users` - User management (admin only)
+- `/api/tickets` - Ticket CRUD operations
+- `/api/webhooks/email` - Inbound email to ticket conversion

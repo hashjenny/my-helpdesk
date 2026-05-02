@@ -4,6 +4,8 @@ import rateLimit from "express-rate-limit"
 import { toNodeHandler } from "better-auth/node"
 import { auth } from "./auth.js"
 import usersRouter from "./routes/users.js"
+import ticketsRouter from "./routes/tickets.js"
+import emailRouter from "./routes/email.js"
 
 const app = express()
 
@@ -52,6 +54,12 @@ app.use(express.json())
 
 // User routes
 app.use("/api/users", usersRouter)
+
+// Ticket routes
+app.use("/api/tickets", ticketsRouter)
+
+// Email webhook routes
+app.use("/api/webhooks", emailRouter)
 
 // Test route
 app.get("/api/test", (_req, res) => res.json({ message: "test" }))

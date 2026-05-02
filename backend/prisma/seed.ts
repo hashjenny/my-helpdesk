@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client"
 import bcrypt from "bcrypt"
-import { Role } from "shared"
+import { Role } from "@helpdesk/shared"
 
 import dotenv from "dotenv";
 

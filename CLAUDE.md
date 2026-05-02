@@ -13,7 +13,25 @@ When asking about libraries, frameworks, SDKs, APIs, or CLI tools — **always u
 - Database: PostgreSQL + Prisma 5
 - Auth: Better Auth with bcrypt password hashing
 - AI: MiniMax API
-- Email: Resend + React Email
+- Email: Resend (inbound email to ticket conversion)
+
+## Package Manager
+
+This project uses **pnpm** with workspace configuration:
+
+```yaml
+packages:
+  - shared
+  - backend
+  - frontend
+```
+
+Commands:
+- `pnpm install` - Install all dependencies
+- `pnpm build` - Build all packages (shared → backend → frontend)
+- `pnpm --filter backend dev` - Start backend dev server
+- `pnpm --filter frontend dev` - Start frontend dev server
+- `pnpm --filter backend prisma:generate` - Generate Prisma client
 
 ## UI Components
 
@@ -49,34 +67,42 @@ import { Card } from "@/components/ui/card"
 - Backend: `backend/src/`
 - Shared: `shared/` (schemas and types shared between frontend and backend)
 - Prisma schema: `backend/prisma/schema.prisma`
-- API module: `frontend/src/lib/api/users.ts` (Axios)
+- API modules: `frontend/src/lib/api/` (Axios)
 - Query client: `frontend/src/lib/query-client.ts` (TanStack Query)
 
 ### Shared Schemas (`shared/`)
 
-Zod schemas and types shared between frontend and backend via the `shared/` package:
+Zod schemas and types shared between frontend and backend via the `@helpdesk/shared` package:
 
 ```typescript
-import { createUserSchema, updateUserSchema, Role, type UserRole } from "shared"
+import { Role, createUserSchema, TicketStatus, createTicketSchema } from "@helpdesk/shared"
 ```
 
 Available exports:
-- `Role` - enum with `ADMIN` and `AGENT` values
+- `Role` - object with `ADMIN` and `AGENT` values
 - `UserRole` - TypeScript type for role values
 - `createUserSchema` - Zod schema for user creation
 - `updateUserSchema` - Zod schema for user updates
 - `changePasswordSchema` - Zod schema for password changes
-
-Import from `"shared"` in both frontend and backend.
+- `TicketStatus` - readonly array `["OPEN", "RESOLVED", "CLOSED"]`
+- `TicketCategory` - readonly array `["GENERAL", "TECHNICAL", "REFUND"]`
+- `Ticket` - interface for ticket data
+- `createTicketSchema` - Zod schema for ticket creation
+- `updateTicketSchema` - Zod schema for ticket updates
 
 ## Frontend Data Fetching
 
-API calls use **Axios** via `frontend/src/lib/api/users.ts`:
+API calls use **Axios** via `frontend/src/lib/api/`:
 
 - `fetchUsers(params)` - GET with pagination/search
 - `createUser(data, token)` - POST
 - `updateUser(id, data, token)` - PATCH
 - `deleteUser(id, token)` - DELETE
+- `fetchTickets(params)` - GET with pagination/filters
+- `fetchTicket(id, token)` - GET single ticket
+- `createTicket(data, token)` - POST
+- `updateTicket(id, data, token)` - PATCH
+- `deleteTicket(id, token)` - DELETE
 
 State management uses **TanStack Query**:
 
@@ -88,28 +114,26 @@ Type-only imports use `import type { User }` (verbatimModuleSyntax enabled)
 
 ### Form Validation
 
-Forms use **React Hook Form** + **Zod** for validation. Zod schemas are shared between frontend and backend via the `shared/` package:
+Forms use **React Hook Form** + **Zod** for validation. Zod schemas are shared via the `shared/` package:
 
 ```tsx
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { createUserSchema } from "shared"
-
-type CreateUserForm = z.infer<typeof createUserSchema>
+import { createTicketSchema, type CreateTicketInput } from "@helpdesk/shared"
 
 export function MyForm() {
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<CreateUserForm>({
-    resolver: zodResolver(createUserSchema),
-    defaultValues: { role: "AGENT" },
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<CreateTicketInput>({
+    resolver: zodResolver(createTicketSchema),
+    defaultValues: { category: "GENERAL" },
   })
 
-  const onSubmit = (data: CreateUserForm) => { /* ... */ }
+  const onSubmit = (data: CreateTicketInput) => { /* ... */ }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <Input {...register("email")} aria-invalid={!!errors.email} />
-      {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
+      <Input {...register("subject")} aria-invalid={!!errors.subject} />
+      {errors.subject && <p className="text-sm text-destructive">{errors.subject.message}</p>}
       {/* ... */}
     </form>
   )
@@ -144,13 +168,27 @@ export function MyForm() {
 - Admin user management panel
 - bcrypt password hashing
 
+**Phase 4: Ticket Management** (completed)
+
+- Full ticket CRUD API (`/api/tickets`)
+- Ticket list with pagination, search, and filters (status, category)
+- Ticket detail with responses
+- Frontend ticket list and detail pages
+- Email-to-ticket webhook (`/api/webhooks/email`)
+- `supportEmail` field on tickets for email-originated tickets
+
 ### Current Phase
 
-**Phase 4: Ticket Management** (upcoming)
+**Phase 5: Email Integration** (in progress)
+
+- Resend integration for inbound email processing
+- Email notification templates (React Email)
 
 ### Navigation
 
+- `/` - Dashboard (placeholder)
 - `/tickets` - Ticket list (authenticated users)
+- `/tickets/:id` - Ticket detail with responses
 - `/users` - User management (admin only)
 - `/admin/users` - Admin user panel (admin only)
 
@@ -172,6 +210,20 @@ export function MyForm() {
 
 - Frontend: <http://localhost:5173>
 - Backend: <http://localhost:3001>
+
+### API Endpoints
+
+**Ticket API:**
+- `GET /api/tickets` - List tickets (pagination, filters)
+- `POST /api/tickets` - Create ticket
+- `GET /api/tickets/:id` - Get ticket with responses
+- `PATCH /api/tickets/:id` - Update ticket (status, category)
+- `DELETE /api/tickets/:id` - Delete ticket (admin only)
+- `GET /api/tickets/:id/responses` - List responses
+- `POST /api/tickets/:id/responses` - Add response
+
+**Email Webhook:**
+- `POST /api/webhooks/email` - Convert inbound email to ticket
 
 ### Implementation Plan
 

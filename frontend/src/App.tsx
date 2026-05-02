@@ -8,6 +8,8 @@ import { StatusCheck } from './components/StatusCheck'
 import { Login } from './pages/Login'
 import { Register } from './pages/Register'
 import { Users } from './pages/Users'
+import { TicketList } from './pages/TicketList'
+import { TicketDetail } from './pages/TicketDetail'
 
 function App() {
   return (
@@ -43,7 +45,7 @@ function App() {
               path="/tickets"
               element={
                 <ProtectedRoute>
-                  <div>Ticket List</div>
+                  <TicketList />
                 </ProtectedRoute>
               }
             />
@@ -51,7 +53,7 @@ function App() {
               path="/tickets/:id"
               element={
                 <ProtectedRoute>
-                  <div>Ticket Detail</div>
+                  <TicketDetail />
                 </ProtectedRoute>
               }
             />
