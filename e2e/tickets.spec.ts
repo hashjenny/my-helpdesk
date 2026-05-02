@@ -188,4 +188,25 @@ test.describe('Ticket Management - Core Tests', () => {
       expect(rowCount).toBeGreaterThan(0)
     }
   })
+
+  // ==========================================================================
+  // CORE: Sorting
+  // ==========================================================================
+
+  test('should sort tickets by column', async ({ page }) => {
+    await authPage.login(TEST_ADMIN.email, TEST_ADMIN.password)
+    await page.goto('/tickets')
+    await page.waitForLoadState('networkidle')
+
+    // Click Subject column header to sort
+    await page.locator('th:has-text("Subject")').click()
+    await page.waitForLoadState('networkidle')
+
+    // Click again to reverse sort
+    await page.locator('th:has-text("Subject")').click()
+    await page.waitForLoadState('networkidle')
+
+    // Verify table is still visible and has rows
+    await expect(page.locator('table tbody tr').first()).toBeVisible()
+  })
 })
