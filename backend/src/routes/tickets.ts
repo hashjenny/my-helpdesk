@@ -20,6 +20,8 @@ router.get("/", requireAuth, async (req, res) => {
     const status = req.query.status as string | undefined
     const category = req.query.category as string | undefined
     const search = req.query.search as string | undefined
+    const sortBy = (req.query.sortBy as string) || "createdAt"
+    const sortOrder = (req.query.sortOrder as string) === "asc" ? "asc" : "desc"
 
     // Validate status/category if provided
     if (status && !TicketStatus.includes(status as any)) {
@@ -31,7 +33,14 @@ router.get("/", requireAuth, async (req, res) => {
       return
     }
 
-    const result = await ticketService.list({ page, limit, status, category, search })
+    // Validate sortBy
+    const validSortFields = ["createdAt", "updatedAt", "subject", "status", "category"]
+    if (!validSortFields.includes(sortBy)) {
+      res.status(400).json({ error: "Invalid sortBy field" })
+      return
+    }
+
+    const result = await ticketService.list({ page, limit, status, category, search, sortBy, sortOrder })
     res.json(result)
   } catch (_error) {
     res.status(500).json({ error: "Failed to fetch tickets" })

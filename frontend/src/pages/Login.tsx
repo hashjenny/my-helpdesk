@@ -78,6 +78,7 @@ export function Login() {
                 autoComplete="email"
                 {...register("email")}
                 aria-invalid={!!errors.email}
+                value="admin@test.com"
               />
               {errors.email && (
                 <p className="text-sm text-destructive">{errors.email.message}</p>
@@ -92,6 +93,7 @@ export function Login() {
                 autoComplete="current-password"
                 {...register("password")}
                 aria-invalid={!!errors.password}
+                value="toor123"
               />
               {errors.password && (
                 <p className="text-sm text-destructive">{errors.password.message}</p>

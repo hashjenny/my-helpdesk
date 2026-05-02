@@ -8,11 +8,13 @@ export const ticketService = {
     status?: string
     category?: string
     search?: string
+    sortBy?: string
+    sortOrder?: string
   }) {
-    const { page, limit, status, category, search } = params
+    const { page, limit, status, category, search, sortBy = "createdAt", sortOrder = "desc" } = params
     const skip = (page - 1) * limit
 
-    const where: any = {}
+    const where: any = { deletedAt: null }
     if (status) where.status = status
     if (category) where.category = category
     if (search) {
@@ -26,7 +28,7 @@ export const ticketService = {
       prisma.ticket.findMany({
         where,
         include: { responses: { orderBy: { createdAt: "asc" } } },
-        orderBy: { createdAt: "desc" },
+        orderBy: { [sortBy]: sortOrder },
         skip,
         take: limit,
       }),
@@ -67,7 +69,10 @@ export const ticketService = {
   },
 
   async delete(id: string) {
-    return prisma.ticket.delete({ where: { id } })
+    return prisma.ticket.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    })
   },
 
   async addResponse(ticketId: string, body: string) {
