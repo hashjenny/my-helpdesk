@@ -83,6 +83,7 @@ export interface TicketResponse {
   ticketId: string
   body: string
   createdAt: string
+  isCustomerReply: boolean
 }
 
 export interface TicketsResponse {
