@@ -4,7 +4,7 @@ import { TicketDetailPage } from './pages/ticket-detail.page'
 
 const TEST_ADMIN = {
   email: 'admin@test.com',
-  password: 'testpass123',
+  password: 'toor123',
 }
 
 test.describe('Ticket Management - Core Tests', () => {
@@ -61,5 +61,35 @@ test.describe('Ticket Management - Core Tests', () => {
 
     // Verify the response appears on the page
     await expect(page.locator(`text=${responseText}`)).toBeVisible({ timeout: 5000 })
+  })
+
+  // ==========================================================================
+  // CORE: Pagination
+  // ==========================================================================
+
+  test('should display tickets list with pagination', async ({ page }) => {
+    // Login using the exact same pattern as the working login test
+    await page.goto('/login')
+    await page.fill('#email', TEST_ADMIN.email)
+    await page.fill('#password', TEST_ADMIN.password)
+    await page.click('button[type="submit"]')
+    await page.waitForTimeout(2000)
+
+    // Verify login succeeded (URL should not contain /login)
+    const url = page.url()
+    expect(url).not.toContain('/login')
+
+    // Navigate to tickets
+    await page.goto('/tickets')
+    await page.waitForLoadState('networkidle')
+
+    // Verify pagination info exists
+    await expect(page.locator('text=Total:')).toBeVisible()
+    await expect(page.locator('button:has-text("Previous")')).toBeVisible()
+    await expect(page.locator('button:has-text("Next")')).toBeVisible()
+
+    // Verify tickets are displayed
+    const rows = page.locator('table tbody tr')
+    await expect(rows.first()).toBeVisible()
   })
 })
