@@ -11,8 +11,18 @@ const trustedOriginsFromEnv = process.env.TRUSTED_ORIGINS
 const defaultTrustedOrigins = process.env.NODE_ENV === "production"
   ? []
   : ["http://localhost:5173"];
+
 const trustedOrigins = trustedOriginsFromEnv.length > 0
-  ? trustedOriginsFromEnv
+  ? trustedOriginsFromEnv.includes("localhost")
+    ? [
+        "http://localhost:5173",
+        "http://localhost:5174",
+        "http://localhost:5175",
+        "http://localhost:5176",
+        "http://localhost:5177",
+        "http://localhost:5178",
+      ]
+    : trustedOriginsFromEnv
   : defaultTrustedOrigins;
 
 export const auth = betterAuth({

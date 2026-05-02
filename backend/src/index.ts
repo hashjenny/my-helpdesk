@@ -17,14 +17,27 @@ const authLimiter = process.env.NODE_ENV === "production"
     })
   : (_req: express.Request, res: express.Response, next: express.NextFunction) => next()
 
-// CORS configuration with proper fallback
+// CORS configuration - support "localhost" as a special keyword
 const trustedOriginsFromEnv = process.env.TRUSTED_ORIGINS
   ?.split(",")
   .map((s) => s.trim())
   .filter(Boolean) ?? []
+const defaultTrustedOrigins = process.env.NODE_ENV === "production"
+  ? []
+  : ["http://localhost:5173"]
+
 const trustedOrigins = trustedOriginsFromEnv.length > 0
-  ? trustedOriginsFromEnv
-  : (process.env.NODE_ENV === "production" ? [] : ["http://localhost:5173"])
+  ? trustedOriginsFromEnv.includes("localhost")
+    ? [
+        "http://localhost:5173",
+        "http://localhost:5174",
+        "http://localhost:5175",
+        "http://localhost:5176",
+        "http://localhost:5177",
+        "http://localhost:5178",
+      ]
+    : trustedOriginsFromEnv
+  : defaultTrustedOrigins
 
 app.use(cors({
   origin: trustedOrigins,
