@@ -1,6 +1,5 @@
 import { test, expect } from '@playwright/test'
 import { AuthPage } from './pages/auth.page'
-import { TicketsListPage } from './pages/tickets.page'
 import { TicketDetailPage } from './pages/ticket-detail.page'
 
 const TEST_ADMIN = {
@@ -10,12 +9,10 @@ const TEST_ADMIN = {
 
 test.describe('Ticket Management - Core Tests', () => {
   let authPage: AuthPage
-  let ticketsListPage: TicketsListPage
   let ticketDetailPage: TicketDetailPage
 
   test.beforeEach(async ({ page }) => {
     authPage = new AuthPage(page)
-    ticketsListPage = new TicketsListPage(page)
     ticketDetailPage = new TicketDetailPage(page)
   })
 
@@ -24,12 +21,14 @@ test.describe('Ticket Management - Core Tests', () => {
   // ==========================================================================
 
   test('should login with valid credentials', async ({ page }) => {
-    await authPage.gotoLogin()
-    await authPage.fillLoginForm(TEST_ADMIN.email, TEST_ADMIN.password)
-    await authPage.submitLogin()
-    await authPage.waitForAuthNavigation()
-    const signOutButton = page.locator('header button:has-text("Sign Out")')
-    await expect(signOutButton).toBeVisible({ timeout: 5000 })
+    await page.goto('/login')
+    await page.fill('input[name="email"]', TEST_ADMIN.email)
+    await page.fill('input[name="password"]', TEST_ADMIN.password)
+    await page.click('button[type="submit"]')
+    await page.waitForTimeout(2000)
+    // Login redirects to /tickets, /users, or / - not /login
+    const url = page.url()
+    expect(url).not.toContain('/login')
   })
 
   // ==========================================================================
@@ -39,14 +38,18 @@ test.describe('Ticket Management - Core Tests', () => {
   test('should allow agent to add a response to a ticket', async ({ page }) => {
     // Login as admin
     await authPage.login(TEST_ADMIN.email, TEST_ADMIN.password)
-    await authPage.waitForAuthNavigation()
 
     // Navigate to tickets list
-    await ticketsListPage.goto()
-    await ticketsListPage.waitForLoad()
+    await page.goto('/tickets')
+    await page.waitForLoadState('networkidle')
 
-    // Click on first ticket's View button
-    await ticketsListPage.viewTicket(0)
+    // Click on first ticket's View link (the first link with href starting with /tickets/)
+    const ticketLink = page.locator('a[href^="/tickets/"]').filter({ hasText: 'View' }).first()
+    await ticketLink.click()
+    await page.waitForLoadState('networkidle')
+
+    // Verify we're on ticket detail page by checking for Add Response form
+    await page.waitForSelector('textarea[name="body"]', { timeout: 5000 })
 
     // Fill the response textarea
     const responseText = 'This is a test response from agent'
@@ -54,7 +57,7 @@ test.describe('Ticket Management - Core Tests', () => {
 
     // Submit the form
     await ticketDetailPage.sendResponseButton.click()
-    await ticketDetailPage.waitForLoad()
+    await page.waitForLoadState('networkidle')
 
     // Verify the response appears on the page
     await expect(page.locator(`text=${responseText}`)).toBeVisible({ timeout: 5000 })

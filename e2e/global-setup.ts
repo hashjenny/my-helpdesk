@@ -30,6 +30,15 @@ async function globalSetup() {
     stdio: 'inherit',
   })
 
+  // Seed tickets for E2E tests
+  execSync('./backend/node_modules/.bin/tsx backend/prisma/seed-tickets.ts', {
+    env: {
+      ...process.env,
+      DATABASE_URL,
+    },
+    stdio: 'inherit',
+  })
+
   console.log('Test database setup completed')
 }
 

@@ -132,6 +132,7 @@ pnpm add resend
 ```
 
 Add to `.env`:
+
 ```
 RESEND_API_KEY="re_xxxxx"
 RESEND_FROM_EMAIL="support@helpdesk.com"

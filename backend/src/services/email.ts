@@ -1,4 +1,5 @@
 import { Resend } from "resend"
+import { prisma } from "../lib/prisma.js"
 import { ticketService } from "./ticketService.js"
 
 const resend = new Resend(process.env.RESEND_API_KEY)
@@ -15,7 +16,7 @@ export const emailService = {
   /**
    * Send ticket response email to customer
    */
-  async sendTicketResponseEmail(ticket: { id: number; subject: string; supportEmail?: string | null }, responseBody: string) {
+  async sendTicketResponseEmail(ticket: { id: string; subject: string; supportEmail?: string | null }, responseBody: string) {
     if (!ticket.supportEmail) {
       return
     }
@@ -42,25 +43,18 @@ export const emailService = {
     // Check if this is a reply to an existing ticket
     const ticketIdMatch = payload.subject.match(/\[Ticket #([^\]]+)\]/)
     if (ticketIdMatch) {
-      const ticketId = parseInt(ticketIdMatch[1], 10)
-      if (!isNaN(ticketId)) {
-        const ticket = await ticketService.getById(ticketId)
-        if (ticket) {
-          const response = await ticketService.addResponse(ticketId, {
-            body,
-            isCustomerReply: false,
-          })
+      const ticketId = ticketIdMatch[1]!
+      const ticket = await ticketService.getById(ticketId)
+      if (ticket) {
+        const response = await ticketService.addResponse(ticketId, body)
 
-          // Update isCustomerReply to true using prisma directly
-          const { Prisma } = await import("@prisma/client")
-          const prisma = new Prisma()
-          await prisma.ticketResponse.update({
-            where: { id: response.id },
-            data: { isCustomerReply: true },
-          })
+        // Update isCustomerReply to true using prisma directly
+        await prisma.ticketResponse.update({
+          where: { id: response.id },
+          data: { isCustomerReply: true },
+        })
 
-          return { ticketId, responseId: response.id, isReply: true }
-        }
+        return { ticketId, responseId: response.id, isReply: true }
       }
     }
 
@@ -73,6 +67,6 @@ export const emailService = {
       supportEmail,
     })
 
-    return ticket
+    return { ticketId: ticket.id, isReply: false }
   },
 }

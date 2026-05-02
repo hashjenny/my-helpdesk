@@ -21,7 +21,7 @@ router.post("/email", async (req, res) => {
       return
     }
 
-    const ticket = await emailService.processInboundEmail({
+    const result = await emailService.processInboundEmail({
       from,
       to,
       subject,
@@ -29,7 +29,8 @@ router.post("/email", async (req, res) => {
       html,
     })
 
-    res.status(201).json({ ticketId: ticket.id })
+    // result can be { ticketId, responseId, isReply } for replies or { ticketId, isReply } for new tickets
+    res.status(201).json({ ticketId: result.ticketId })
   } catch (_error) {
     console.error("Email webhook error:", _error)
     res.status(500).json({ error: "Failed to process email" })

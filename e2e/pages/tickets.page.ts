@@ -137,8 +137,8 @@ export class TicketListPage {
    * Click view button for a ticket by row index
    */
   async viewTicket(rowIndex: number = 0): Promise<void> {
-    const viewButton = this.page.locator('button:has-text("View")').nth(rowIndex)
-    await viewButton.click()
+    const viewLink = this.page.locator('a:has-text("View")').nth(rowIndex)
+    await viewLink.click()
   }
 
   /**
