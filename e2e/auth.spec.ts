@@ -125,8 +125,7 @@ test.describe('Authentication System', () => {
 
   // ==========================================================================
   // REGISTRATION FLOW TESTS
-  // NOTE: Registration is disabled on backend (disableSignUp: true)
-  // These tests verify the UI behavior when sign-up is not allowed
+  // These tests cover successful sign-up and client-side validation
   // ==========================================================================
 
   test.describe('Registration Flow', () => {
@@ -149,8 +148,9 @@ test.describe('Authentication System', () => {
       await authPage.fillRegisterForm('New Test User', uniqueEmail, 'securepass123', 'securepass123')
       await authPage.submitRegister()
 
-      await page.waitForURL(/\/(login)?$/, { timeout: 5000 }).catch(() => {})
-      await authPage.expectNoErrorAlert()
+      await authPage.waitForAuthNavigation()
+      const signOutButton = page.locator('header button:has-text("Sign Out")')
+      await expect(signOutButton).toBeVisible({ timeout: 5000 })
     })
 
     test('should show error when registering with duplicate email', async ({ page }) => {
@@ -236,19 +236,12 @@ test.describe('Authentication System', () => {
 
   // ==========================================================================
   // SESSION / LOGOUT TESTS
-  // NOTE: These tests are skipped because the seeded admin user cannot login
-  // due to an issue with better-auth account configuration.
-  // The login flow returns "Invalid email or password" even with correct credentials.
-  // This is a backend configuration issue that needs to be investigated.
   // ==========================================================================
 
   test.describe('Session / Logout', () => {
-    // These tests require successful login which has a known issue in test environment
-    // The login API works correctly, but the E2E test setup has issues with session/cookie handling
     test('should successfully logout and redirect to login', async ({ page }) => {
       await authPage.login(TEST_ADMIN.email, TEST_ADMIN.password)
-      await page.waitForURL('/', { timeout: 5000 })
-      await page.waitForLoadState('networkidle')
+      await authPage.waitForAuthNavigation()
       const signOutButton = page.locator('header button:has-text("Sign Out")')
       await expect(signOutButton).toBeVisible({ timeout: 5000 })
       await signOutButton.click()
@@ -258,8 +251,7 @@ test.describe('Authentication System', () => {
 
     test('should access protected route after successful login', async ({ page }) => {
       await authPage.login(TEST_ADMIN.email, TEST_ADMIN.password)
-      await page.waitForURL('/', { timeout: 5000 })
-      await page.waitForLoadState('networkidle')
+      await authPage.waitForAuthNavigation()
       await page.goto('/tickets')
       await page.waitForLoadState('networkidle')
       await expect(page).toHaveURL(/\/tickets/, { timeout: 5000 })
@@ -279,8 +271,7 @@ test.describe('Authentication System', () => {
 
     test('should remember login state after page reload', async ({ page }) => {
       await authPage.login(TEST_ADMIN.email, TEST_ADMIN.password)
-      await page.waitForURL('/', { timeout: 5000 })
-      await page.waitForLoadState('networkidle')
+      await authPage.waitForAuthNavigation()
       const signOutButton = page.locator('header button:has-text("Sign Out")')
       await expect(signOutButton).toBeVisible({ timeout: 5000 })
       await page.reload()

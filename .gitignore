@@ -70,3 +70,6 @@ playwright-report/
 /playwright/.cache/
 /playwright/.auth/
 .playwright-cli/
+
+.codex/
+AGENTS.md

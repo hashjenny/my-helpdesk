@@ -10,7 +10,7 @@ async function globalSetup() {
     { stdio: 'pipe' }
   )
 
-  // Push schema to test database using Prisma
+  // Reset schema to test database
   execSync('./backend/node_modules/.bin/prisma db push --schema backend/prisma/schema.prisma --skip-generate --accept-data-loss --force-reset', {
     env: {
       ...process.env,
@@ -19,7 +19,7 @@ async function globalSetup() {
     stdio: 'inherit',
   })
 
-  // Seed admin user using tsx
+  // Seed admin user - explicitly pass all required env vars without loading .env files
   execSync('./backend/node_modules/.bin/tsx backend/prisma/seed.ts', {
     env: {
       ...process.env,

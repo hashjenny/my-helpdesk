@@ -2,9 +2,8 @@ import { PrismaClient } from "@prisma/client"
 import bcrypt from "bcrypt"
 import { Role } from "@helpdesk/shared"
 
-import dotenv from "dotenv";
-
-dotenv.config();
+// DATABASE_URL should be passed via environment variable
+// The seed script should NOT load .env files as it may override the test database URL
 
 const prisma = new PrismaClient()
 

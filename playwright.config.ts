@@ -32,7 +32,7 @@ const apiPort = (() => {
     return envVars.PORT || "3001";
   }
 })();
-const frontendBaseUrl = envVars.TRUSTED_ORIGINS?.split(",")[0]?.trim() || "http://localhost:5173";
+const frontendBaseUrl = "http://localhost:5173";
 
 export default defineConfig({
   testDir: "./e2e",
@@ -61,10 +61,10 @@ export default defineConfig({
   ],
   webServer: [
     {
-      command: "npm run dev",
-      cwd: "./backend",
+      command: "pnpm --filter backend dev",
+      cwd: ".",
       url: `${apiBaseUrl}/api/health`,
-      reuseExistingServer: !process.env.CI,
+      reuseExistingServer: true,
       timeout: 120 * 1000,
       env: {
         ...envVars,
@@ -73,10 +73,10 @@ export default defineConfig({
       },
     },
     {
-      command: "npm run dev",
-      cwd: "./frontend",
+      command: "pnpm --filter frontend dev --host",
+      cwd: ".",
       url: frontendBaseUrl,
-      reuseExistingServer: !process.env.CI,
+      reuseExistingServer: true,
       timeout: 120 * 1000,
       env: {
         NODE_ENV: "test",

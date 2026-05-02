@@ -46,7 +46,7 @@ export class AuthPage {
     this.registerLinkToLogin = page.locator('a[href="/login"]')
 
     // Common
-    this.errorAlert = page.locator('[role="alert"]')
+    this.errorAlert = page.locator('.text-destructive, [role="alert"], .bg-red-100')
     this.pageHeading = page.locator('h1, [class*="card"] h1')
   }
 
@@ -81,12 +81,18 @@ export class AuthPage {
 
   /**
    * Login with email and password
+   * Note: After successful login, better-auth redirects to "/" using window.location.href
    */
   async login(email: string, password: string): Promise<void> {
     await this.gotoLogin()
     await this.fillLoginForm(email, password)
     await this.submitLogin()
-    await this.page.waitForURL('http://localhost:5173/', { timeout: 10000 })
+    // Wait for navigation to complete after form submission
+    await this.page.waitForLoadState('networkidle')
+    // If URL still contains /login, wait a bit more for potential client-side redirect
+    if (this.page.url().includes('/login')) {
+      await this.page.waitForTimeout(1000)
+    }
     await this.page.waitForLoadState('networkidle')
   }
 
