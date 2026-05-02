@@ -10,12 +10,12 @@ This backend uses Express with TypeScript running on Node.js.
 
 ### Runtime Commands
 
-- Use `npm install` to install dependencies
-- Use `npm run dev` to start the development server with tsx watch
-- Use `npm run build` to compile TypeScript
-- Use `npm run start` to run the production build
-- Use `npx tsx <file>` to run TypeScript files directly
-- Use `npx prisma <command>` for Prisma CLI commands
+- Use `pnpm install` to install dependencies
+- Use `pnpm --filter backend dev` to start the development server with tsx watch
+- Use `pnpm --filter backend build` to compile TypeScript
+- Use `pnpm --filter backend start` to run the production build
+- Use `pnpm --filter backend prisma:generate` to generate Prisma Client
+- Use `pnpm --filter backend prisma:studio` to open Prisma Studio
 
 ### Dependencies
 

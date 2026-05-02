@@ -1,4 +1,4 @@
-import { Role, type User } from "shared"
+import { Role, type User } from "@helpdesk/shared"
 import { Button } from "@/components/ui/button"
 import {
   Table,

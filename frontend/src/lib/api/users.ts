@@ -1,6 +1,6 @@
 import axios from "axios"
 import { API_BASE, signOut } from "../auth-client"
-import type { CreateUserInput, User, UsersResponse } from "shared"
+import type { CreateUserInput, User, UsersResponse } from "@helpdesk/shared"
 
 const createAxiosInstance = (token: string) => {
   const instance = axios.create({

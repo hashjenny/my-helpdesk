@@ -1,5 +1,5 @@
 {
-  "name": "shared",
+  "name": "@helpdesk/shared",
   "version": "1.0.0",
   "description": "Shared schemas and types",
   "type": "module",

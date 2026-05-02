@@ -2,7 +2,7 @@ import { Router } from "express"
 import bcrypt from "bcrypt"
 import { prisma } from "../lib/prisma.js"
 import { requireAuth, requireRole } from "../middleware/session.js"
-import { createUserSchema, updateUserSchema, changePasswordSchema, isUserRole, Role } from "shared"
+import { createUserSchema, updateUserSchema, changePasswordSchema, isUserRole, Role } from "@helpdesk/shared"
 
 const router = Router()
 
@@ -72,7 +72,7 @@ router.post("/", requireAuth, requireRole(Role.ADMIN), async (req, res) => {
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10)
-    const user = await prisma.$transaction(async (tx) => {
+    const user = await prisma.$transaction(async (tx: any) => {
       const createdUser = await tx.user.create({
         data: {
           email,

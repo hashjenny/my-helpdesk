@@ -2,7 +2,7 @@ import { useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useAuth } from "@/hooks/useAuth"
 import { fetchUsers, createUser, updateUser, deleteUser } from "../lib/api/users"
-import type { CreateUserInput, UpdateUserInput, User } from "shared"
+import type { CreateUserInput, UpdateUserInput, User } from "@helpdesk/shared"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import {

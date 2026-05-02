@@ -1,18 +1,21 @@
 {
   "name": "my-helpdesk",
   "private": true,
+  "pnpm": {
+    "onlyBuiltDependencies": ["@prisma/client", "@prisma/engines", "bcrypt", "esbuild", "prisma"]
+  },
   "devDependencies": {
     "@playwright/test": "^1.59.1",
     "@types/node": "^25.6.0",
     "typescript": "^6.0.3"
   },
   "scripts": {
-    "build": "npm run build --prefix shared && npm run build --prefix backend && npm run build --prefix frontend",
-    "dev:backend": "npm run dev --prefix backend",
-    "dev:frontend": "npm run dev --prefix frontend",
-    "lint": "npm run lint --prefix frontend",
-    "test:frontend": "npm test --prefix frontend -- --run",
-    "test": "npm run build --prefix shared && playwright test",
+    "build": "pnpm --filter shared build && pnpm --filter backend build && pnpm --filter frontend build",
+    "dev:backend": "pnpm --filter backend dev",
+    "dev:frontend": "pnpm --filter frontend dev",
+    "lint": "pnpm --filter frontend lint",
+    "test:frontend": "pnpm --filter frontend test",
+    "test": "pnpm build && playwright test",
     "test:ui": "playwright test --ui",
     "test:headed": "playwright test --headed",
     "show-report": "playwright show-report"

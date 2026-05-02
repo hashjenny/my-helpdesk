@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import type { User } from 'shared'
+import type { User } from "@helpdesk/shared"
 import {
   UserTable,
   UserFilters,

@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import type { User } from "shared"
+import type { User } from "@helpdesk/shared"
 
 interface EditUserModalProps {
   user: User

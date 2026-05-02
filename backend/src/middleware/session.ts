@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from "express"
 import { prisma } from "../lib/prisma.js"
-import { Role, type UserRole } from "shared"
+import { Role, type UserRole } from "@helpdesk/shared"
 
 export async function requireAuth(req: Request, res: Response, next: NextFunction) {
   const sessionToken = req.headers.authorization?.replace("Bearer ", "")
