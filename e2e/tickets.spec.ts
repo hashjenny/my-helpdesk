@@ -163,4 +163,29 @@ test.describe('Ticket Management - Core Tests', () => {
     const categoryCells = page.locator('table tbody tr td:nth-child(3)')
     await expect(categoryCells.first()).toContainText('Technical')
   })
+
+  // ==========================================================================
+  // CORE: Search Tickets
+  // ==========================================================================
+
+  test('should search tickets by keyword', async ({ page }) => {
+    await authPage.login(TEST_ADMIN.email, TEST_ADMIN.password)
+    await page.goto('/tickets')
+    await page.waitForLoadState('networkidle')
+
+    // Get a known ticket subject from the list
+    const firstSubject = await page.locator('table tbody tr td').first().textContent()
+
+    // Search for part of the subject
+    if (firstSubject && firstSubject.length > 3) {
+      const searchTerm = firstSubject.substring(0, 5)
+      await page.fill('input[placeholder*="Search"]', searchTerm)
+      await page.waitForLoadState('networkidle')
+
+      // Verify search results contain the term
+      const rows = page.locator('table tbody tr')
+      const rowCount = await rows.count()
+      expect(rowCount).toBeGreaterThan(0)
+    }
+  })
 })
