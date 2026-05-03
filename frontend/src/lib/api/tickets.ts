@@ -97,3 +97,8 @@ export async function polishTicketResponse(
   const response = await instance.post(`/api/tickets/${id}/polish`, { body })
   return response.data as { polished: string }
 }
+
+export const summarizeTicket = (id: string, token: string) =>
+  axios.post(`/api/tickets/${id}/summarize`, {}, {
+    headers: { Authorization: `Bearer ${token}` },
+  }).then(r => r.data as { summary: string })
