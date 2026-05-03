@@ -8,7 +8,8 @@ interface ResendWebhookPayload {
   from: string
   to: string
   subject: string
-  text: string
+  text?: string
+  body?: string
   html?: string
 }
 
@@ -35,7 +36,7 @@ export const emailService = {
    */
   async processInboundEmail(payload: ResendWebhookPayload) {
     // Use text body, fallback to stripped HTML
-    const body = payload.text || payload.html?.replace(/<[^>]*>/g, "") || ""
+    const body = payload.text || payload.body || payload.html?.replace(/<[^>]*>/g, "") || ""
 
     // Extract sender email from "Name <email>" format
     const supportEmail = payload.from.match(/<(.+?)>/)?.[1] || payload.from

@@ -2,6 +2,8 @@ import { Router } from "express"
 import { requireAuth, requireRole } from "../middleware/session.js"
 import { ticketService } from "../services/ticketService.js"
 import { aiService } from "../services/aiService.js"
+import { prisma } from "../lib/prisma.js"
+import { sendEmail } from "../lib/resend.js"
 import {
   createTicketSchema,
   updateTicketSchema,
@@ -12,6 +14,16 @@ import {
 } from "@helpdesk/shared"
 
 const router = Router()
+
+// Simple HTML escaping for user-controlled input in email templates
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;")
+}
 
 // GET /api/tickets - List tickets
 router.get("/", requireAuth, async (req, res) => {
@@ -63,6 +75,43 @@ router.post("/", requireAuth, async (req, res) => {
   try {
     const ticket = await ticketService.create(result.data)
     res.status(201).json(ticket)
+
+    // Notify all agents about the new ticket (async, non-blocking)
+    ;(async () => {
+      try {
+        const agents = await prisma.user.findMany({
+          where: { role: "AGENT", deletedAt: null },
+          select: { email: true },
+        })
+        if (agents.length === 0) return
+
+        const ticketUrl = `http://localhost:5173/tickets/${ticket.id}`
+        const createdAt = ticket.createdAt instanceof Date
+          ? ticket.createdAt.toLocaleString("zh-CN")
+          : String(ticket.createdAt)
+
+        await Promise.allSettled(
+          agents.map((agent) =>
+            sendEmail({
+              to: agent.email,
+              subject: `[新工单] #${ticket.id} - ${ticket.subject}`,
+              html: `
+            <h2>新工单通知</h2>
+            <p>有一个新的工单需要处理。</p>
+            <hr/>
+            <p><strong>工单编号：</strong>#${ticket.id}</p>
+            <p><strong>主题：</strong>${escapeHtml(ticket.subject)}</p>
+            <p><strong>提交人：</strong>${escapeHtml(ticket.supportEmail ?? "N/A")}</p>
+            <p><strong>创建时间：</strong>${createdAt}</p>
+            <a href="${ticketUrl}">查看工单</a>
+          `,
+            })
+          )
+        )
+      } catch (err) {
+        console.error(`[Email] Failed to send agent notifications for ticket ${ticket.id}:`, err)
+      }
+    })()
   } catch (_error) {
     res.status(500).json({ error: "Failed to create ticket" })
   }
