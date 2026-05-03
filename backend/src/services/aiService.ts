@@ -12,6 +12,10 @@ interface MiniMaxResponse {
   }>
 }
 
+interface SummaryResult {
+  summary: string
+}
+
 export const aiService = {
   async polishText(text: string): Promise<PolishResult> {
     if (!text.trim()) {
@@ -61,5 +65,58 @@ export const aiService = {
     const polished = data.choices?.[0]?.message?.content ?? text
 
     return { polished }
+  },
+
+  async summarizeTicket(ticket: {
+    subject: string
+    body: string
+    responses: Array<{ body: string; isCustomerReply: boolean; createdAt: string }>
+  }): Promise<SummaryResult> {
+    const apiKey = process.env.MINIMAX_API_KEY
+    if (!apiKey) {
+      throw new Error("MINIMAX_API_KEY not configured")
+    }
+
+    const { Anthropic } = await import("@anthropic-ai/sdk")
+
+    const client = new Anthropic({
+      apiKey: apiKey,
+      baseURL: "https://api.minimax.com/anthropic",
+    })
+
+    // Build prompt
+    const responseList = ticket.responses
+      .map(r => `${r.isCustomerReply ? "客户" : "客服"} [${r.createdAt}]: ${r.body}`)
+      .join("\n")
+
+    const prompt = `请总结以下工单的关键信息，限制在 200 字以内：
+
+主题：${ticket.subject}
+正文：${ticket.body}
+${responseList ? `回复记录：\n${responseList}` : ""}
+
+请用中文回复，格式：
+- 问题核心：...
+- 已尝试步骤：...
+- 当前状态：...`
+
+    const message = await client.messages.create({
+      model: "MiniMax-M2.7",
+      max_tokens: 300,
+      system: "你是一个专业的客服支持助手，负责总结工单要点。",
+      messages: [
+        { role: "user", content: prompt }
+      ],
+    })
+
+    let summary = ""
+    for (const block of message.content) {
+      if (block.type === "text") {
+        summary = block.text
+        break
+      }
+    }
+
+    return { summary }
   }
 }
