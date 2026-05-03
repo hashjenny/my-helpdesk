@@ -7,6 +7,7 @@ import { auth } from "./auth.js"
 import usersRouter from "./routes/users.js"
 import ticketsRouter from "./routes/tickets.js"
 import emailRouter from "./routes/email.js"
+import dashboardRouter from "./routes/dashboard.js"
 
 const app = express()
 
@@ -61,6 +62,9 @@ app.use("/api/tickets", ticketsRouter)
 
 // Email webhook routes
 app.use("/api/webhooks", emailRouter)
+
+// Dashboard routes
+app.use("/api/dashboard", dashboardRouter)
 
 // Test route
 app.get("/api/test", (_req, res) => res.json({ message: "test" }))
