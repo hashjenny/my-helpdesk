@@ -49,12 +49,10 @@ export const aiService = {
     const content = await callMiniMax([
       {
         role: "system",
-        name: "MiniMax AI",
         content: `You are a professional customer support agent. Polish the user's reply to make it more professional, friendly, and well-structured. Keep the same meaning but improve clarity, grammar, and tone. Only return the polished text, nothing else.`
       },
       {
         role: "user",
-        name: "User",
         content: text
       }
     ], 0.7)
