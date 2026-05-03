@@ -6,6 +6,7 @@ import { fetchTicket, updateTicket, addResponse, summarizeTicket, classifyTicket
 import { fetchAgents } from "../lib/api/users"
 import type { UpdateTicketInput, TicketStatus, TicketCategory } from "@helpdesk/shared"
 import { RefreshCw, Sparkles } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { TicketResponses, ReplyForm, EmailBadge } from "@/components/tickets"
@@ -107,9 +108,7 @@ export function TicketDetail() {
   }
 
   useEffect(() => {
-    if (ticket && ticket.category === "GENERAL" && !suggestedCategory) {
-      handleClassify()
-    }
+    // Auto-classify disabled - user triggers manually via button
   }, [ticket?.id])
 
   const isAdmin = session?.user?.role === "ADMIN"
@@ -173,37 +172,30 @@ export function TicketDetail() {
             </div>
           </div>
 
-          <Card className="bg-blue-50 border-blue-200 mt-2">
+          <Card className="border-blue-200 mt-2">
             <CardContent className="pt-3 pb-3">
               <div className="flex items-start gap-2">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-sm font-medium text-blue-700">AI 总结</span>
-                    {summary && (
-                      <button
-                        onClick={handleGenerateSummary}
-                        disabled={isSummaryLoading}
-                        className="p-1 hover:bg-blue-100 rounded transition-colors"
-                        title="刷新总结"
-                      >
-                        <RefreshCw className={`w-3.5 h-3.5 text-blue-600 ${isSummaryLoading ? "animate-spin" : ""}`} />
-                      </button>
-                    )}
+                    <Button
+                      onClick={handleGenerateSummary}
+                      disabled={isSummaryLoading}
+                      variant="outline"
+                      size="sm"
+                      className="h-7 text-xs gap-1"
+                    >
+                      {isSummaryLoading ? (
+                        <><RefreshCw className={`w-3 h-3 animate-spin`} /> 生成中...</>
+                      ) : (
+                        <><Sparkles className="w-3 h-3" /> AI 总结</>
+                      )}
+                    </Button>
                   </div>
-                  {isSummaryLoading ? (
-                    <p className="text-sm text-muted-foreground">生成中...</p>
-                  ) : summaryError ? (
+                  {summaryError ? (
                     <p className="text-sm text-destructive">生成失败，请重试</p>
                   ) : summary ? (
-                    <p className="text-sm text-blue-900 whitespace-pre-wrap">{summary}</p>
-                  ) : (
-                    <button
-                      onClick={handleGenerateSummary}
-                      className="text-sm text-blue-600 hover:text-blue-800 underline"
-                    >
-                      点击生成 AI 总结
-                    </button>
-                  )}
+                    <p className="text-sm text-blue-900 whitespace-pre-wrap mt-2">{summary}</p>
+                  ) : null}
                 </div>
               </div>
             </CardContent>
@@ -225,14 +217,16 @@ export function TicketDetail() {
           <Separator />
 
           <div className="flex items-center gap-2 mb-2">
-            <button
+            <Button
               onClick={handleSuggestReplies}
               disabled={isSuggestingReplies}
-              className="text-sm text-purple-600 hover:text-purple-800 flex items-center gap-1"
+              variant="outline"
+              size="sm"
+              className="text-xs gap-1"
             >
-              <Sparkles className="w-4 h-4" />
+              <Sparkles className="w-3 h-3" />
               {isSuggestingReplies ? "生成中..." : "AI 推荐回复"}
-            </button>
+            </Button>
           </div>
 
           {suggestedReplies.length > 0 && (
@@ -278,6 +272,18 @@ export function TicketDetail() {
 
               <div>
                 <label className="text-sm font-medium block mb-1">Category</label>
+                <div className="flex items-center gap-2 mb-1">
+                  <Button
+                    onClick={handleClassify}
+                    disabled={isClassifying}
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs gap-1"
+                  >
+                    <Sparkles className="w-3 h-3" />
+                    {isClassifying ? "分析中..." : "AI 分类"}
+                  </Button>
+                </div>
                 <select
                   className="w-full border rounded px-3 py-2 text-sm"
                   value={ticket.category}

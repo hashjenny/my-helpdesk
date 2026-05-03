@@ -12,7 +12,7 @@ When asking about libraries, frameworks, SDKs, APIs, or CLI tools — **always u
 - Backend: Express + TypeScript + Node.js
 - Database: PostgreSQL + Prisma 5
 - Auth: Better Auth with bcrypt password hashing
-- AI: MiniMax API
+- AI: MiniMax API via Anthropic SDK (`@anthropic-ai/sdk` with `baseURL: "https://api.minimaxi.com/anthropic"`, model: `MiniMax-M2.7`)
 - Email: Resend (inbound email to ticket conversion)
 
 ## Package Manager
@@ -27,6 +27,7 @@ packages:
 ```
 
 Commands:
+
 - `pnpm install` - Install all dependencies
 - `pnpm build` - Build all packages (shared → backend → frontend)
 - `pnpm --filter backend dev` - Start backend dev server
@@ -79,6 +80,7 @@ import { Role, createUserSchema, TicketStatus, createTicketSchema } from "@helpd
 ```
 
 Available exports:
+
 - `Role` - object with `ADMIN` and `AGENT` values
 - `UserRole` - TypeScript type for role values
 - `createUserSchema` - Zod schema for user creation
@@ -182,16 +184,30 @@ export function MyForm() {
 
 ### Current Phase
 
-**Phase 5: Email Integration** (in progress)
+**Phase 5: Email Integration** (completed)
 
 - Resend integration for inbound email processing
 - Email notification templates (React Email)
 
+**Phase 6: AI Features** (completed)
+
+- `aiService.ts` with MiniMax API integration via Anthropic SDK (`@anthropic-ai/sdk`)
+- `classifyTicket` - AI classification into GENERAL/TECHNICAL/REFUND
+- `suggestReplies` - AI-generated reply suggestions
+- `summarizeTicket` - AI-powered ticket summarization
+- `polishText` - AI text polishing for agent replies
+
+**Phase 7: Dashboard** (completed)
+
+- `GET /api/dashboard/stats` - Ticket counts by status and category
+- `GET /api/dashboard/recent` - 10 most recent tickets
+- Dashboard page at `/` with stat cards and recent tickets list
+
 ### Navigation
 
-- `/` - Dashboard (placeholder)
+- `/` - Dashboard (real data from API)
 - `/tickets` - Ticket list (authenticated users)
-- `/tickets/:id` - Ticket detail with responses
+- `/tickets/:id` - Ticket detail with AI features (classify, suggest replies)
 - `/users` - User management (admin only)
 - `/admin/users` - Admin user panel (admin only)
 
@@ -217,6 +233,7 @@ export function MyForm() {
 ### API Endpoints
 
 **Ticket API:**
+
 - `GET /api/tickets` - List tickets (pagination, filters)
 - `POST /api/tickets` - Create ticket
 - `GET /api/tickets/:id` - Get ticket with responses
@@ -226,6 +243,7 @@ export function MyForm() {
 - `POST /api/tickets/:id/responses` - Add response
 
 **Email Webhook:**
+
 - `POST /api/webhooks/email` - Convert inbound email to ticket
 
 ### Implementation Plan
@@ -267,6 +285,7 @@ See `plan.md` for full feature breakdown across 8 phases.
 | `TicketResponses` | ✅ 已覆盖空状态、响应列表、Agent/Customer 标签 |
 
 **E2E 测试应覆盖（组件测试未覆盖）：**
+
 - 端到端用户流程（登录 → 操作 → 结果）
 - 与真实后端交互的完整 CRUD
 - 页面间导航

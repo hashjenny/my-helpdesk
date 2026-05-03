@@ -1,3 +1,4 @@
+import { useEffect } from "react"
 import { useForm, type Resolver, useWatch } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -35,6 +36,13 @@ export function ReplyForm({ ticketId, onSubmit, isPending, defaultValue }: Reply
     resolver: zodResolver(replySchema) as Resolver<ReplyFormData>,
     defaultValues: { body: defaultValue ?? "" },
   })
+
+  // Sync form when defaultValue changes (e.g., when clicking a suggested reply)
+  useEffect(() => {
+    if (defaultValue !== undefined) {
+      reset({ body: defaultValue })
+    }
+  }, [defaultValue, reset])
 
   const currentBody = useWatch({ control, name: "body" })
 

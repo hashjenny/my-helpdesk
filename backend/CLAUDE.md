@@ -17,6 +17,32 @@ This backend uses Express with TypeScript running on Node.js.
 - Use `pnpm --filter backend prisma:generate` to generate Prisma Client
 - Use `pnpm --filter backend prisma:studio` to open Prisma Studio
 
+### AI Integration
+
+**Use Anthropic SDK** (`@anthropic-ai/sdk`) to call MiniMax models. MiniMax provides an Anthropic-compatible API.
+
+**Configuration:**
+```typescript
+import Anthropic from "@anthropic-ai/sdk"
+
+const MiniMaxClient = new Anthropic({
+  apiKey: process.env.MINIMAX_API_KEY,
+  baseURL: "https://api.minimaxi.com/anthropic",
+})
+```
+
+**Usage:**
+```typescript
+const message = await MiniMaxClient.messages.create({
+  model: "MiniMax-M2.7",
+  max_tokens: 1024,
+  system: "Your system prompt",
+  messages: [{ role: "user", content: "user message" }],
+})
+
+const text = message.content[0]?.type === "text" ? message.content[0].text : ""
+```
+
 ### Dependencies
 
 - Express for HTTP server
@@ -24,6 +50,7 @@ This backend uses Express with TypeScript running on Node.js.
 - Better Auth for authentication
 - bcrypt for password hashing
 - tsx for development auto-reloading
+- **@anthropic-ai/sdk** for MiniMax AI (Anthropic-compatible API)
 
 ### Project Structure
 
