@@ -72,4 +72,4 @@ playwright-report/
 .playwright-cli/
 
 .codex/
-AGENTS.md
+AGENTS.md.worktrees
