@@ -1,6 +1,7 @@
 import { Router } from "express"
 import { requireAuth, requireRole } from "../middleware/session.js"
 import { ticketService } from "../services/ticketService.js"
+import { aiService } from "../services/aiService.js"
 import {
   createTicketSchema,
   updateTicketSchema,
@@ -156,10 +157,10 @@ router.post("/:id/polish", requireAuth, async (req, res) => {
   }
 
   try {
-    const { aiService } = await import("../services/aiService.js")
     const result = await aiService.polishText(body)
     res.json(result)
-  } catch (_error) {
+  } catch (error) {
+    console.error("Polish text error:", error)
     res.status(500).json({ error: "Failed to polish text" })
   }
 })
