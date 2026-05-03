@@ -165,4 +165,26 @@ router.post("/:id/polish", requireAuth, async (req, res) => {
   }
 })
 
+// POST /api/tickets/:id/summarize - AI summary of ticket
+router.post("/:id/summarize", requireAuth, async (req, res) => {
+  try {
+    const ticket = await ticketService.getById(req.params.id as string)
+    if (!ticket) {
+      res.status(404).json({ error: "Ticket not found" })
+      return
+    }
+
+    const result = await aiService.summarizeTicket({
+      subject: ticket.subject,
+      body: ticket.body,
+      responses: ticket.responses ?? [],
+    })
+    res.json(result)
+  } catch (error) {
+    const err = error as { message?: string }
+    console.error("Summarize error:", err?.message || error)
+    res.status(500).json({ error: "Failed to summarize ticket" })
+  }
+})
+
 export default router
