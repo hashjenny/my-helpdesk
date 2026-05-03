@@ -245,4 +245,56 @@ router.post("/:id/summarize", requireAuth, async (req, res) => {
   }
 })
 
+// POST /api/tickets/:id/classify - AI classify ticket category
+router.post("/:id/classify", requireAuth, async (req, res) => {
+  try {
+    const ticket = await ticketService.getById(req.params.id as string)
+    if (!ticket) {
+      res.status(404).json({ error: "Ticket not found" })
+      return
+    }
+    if (req.user?.role === "AGENT" && ticket.assignedTo !== req.user?.id) {
+      res.status(403).json({ error: "Access denied" })
+      return
+    }
+
+    const result = await aiService.classifyTicket(ticket.subject, ticket.body)
+    res.json(result)
+  } catch (error) {
+    const err = error as { message?: string }
+    console.error("Classify error:", err?.message || error)
+    res.status(500).json({ error: "Failed to classify ticket" })
+  }
+})
+
+// GET /api/tickets/:id/suggested-reply - AI suggest replies
+router.get("/:id/suggested-reply", requireAuth, async (req, res) => {
+  try {
+    const ticket = await ticketService.getById(req.params.id as string)
+    if (!ticket) {
+      res.status(404).json({ error: "Ticket not found" })
+      return
+    }
+    if (req.user?.role === "AGENT" && ticket.assignedTo !== req.user?.id) {
+      res.status(403).json({ error: "Access denied" })
+      return
+    }
+
+    const result = await aiService.suggestReplies({
+      subject: ticket.subject,
+      body: ticket.body,
+      responses: (ticket.responses ?? []).map(r => ({
+        body: r.body,
+        isCustomerReply: r.isCustomerReply,
+        createdAt: r.createdAt instanceof Date ? r.createdAt.toISOString() : String(r.createdAt),
+      })),
+    })
+    res.json(result)
+  } catch (error) {
+    const err = error as { message?: string }
+    console.error("Suggest reply error:", err?.message || error)
+    res.status(500).json({ error: "Failed to generate suggested replies" })
+  }
+})
+
 export default router
