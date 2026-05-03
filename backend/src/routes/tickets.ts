@@ -173,6 +173,11 @@ router.post("/:id/summarize", requireAuth, async (req, res) => {
       res.status(404).json({ error: "Ticket not found" })
       return
     }
+    // Agents can only see tickets assigned to them
+    if (req.user?.role === "AGENT" && ticket.assignedTo !== req.user?.id) {
+      res.status(403).json({ error: "Access denied" })
+      return
+    }
 
     const result = await aiService.summarizeTicket({
       subject: ticket.subject,
