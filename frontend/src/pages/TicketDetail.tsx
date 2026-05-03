@@ -57,6 +57,7 @@ export function TicketDetail() {
   const [isClassifying, setIsClassifying] = useState(false)
   const [suggestedReplies, setSuggestedReplies] = useState<string[]>([])
   const [isSuggestingReplies, setIsSuggestingReplies] = useState(false)
+  const [replyText, setReplyText] = useState("")
 
   const handleGenerateSummary = async () => {
     if (!id || !token) return
@@ -241,7 +242,7 @@ export function TicketDetail() {
                 {suggestedReplies.map((reply, i) => (
                   <button
                     key={i}
-                    onClick={() => {}}
+                    onClick={() => setReplyText(reply)}
                     className="text-xs text-left px-2 py-1 bg-white border border-purple-200 rounded hover:bg-purple-100 transition-colors"
                   >
                     {reply}
@@ -251,7 +252,7 @@ export function TicketDetail() {
             </div>
           )}
 
-          <ReplyForm ticketId={id!} onSubmit={handleReply} isPending={responseMutation.isPending} />
+          <ReplyForm ticketId={id!} onSubmit={handleReply} isPending={responseMutation.isPending} defaultValue={replyText} />
         </div>
 
         {/* Right column - Controls */}

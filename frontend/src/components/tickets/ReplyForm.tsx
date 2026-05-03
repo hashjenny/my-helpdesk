@@ -18,9 +18,10 @@ interface ReplyFormProps {
   ticketId: string
   onSubmit: (body: string) => void
   isPending: boolean
+  defaultValue?: string
 }
 
-export function ReplyForm({ ticketId, onSubmit, isPending }: ReplyFormProps) {
+export function ReplyForm({ ticketId, onSubmit, isPending, defaultValue }: ReplyFormProps) {
   const { session } = useAuth()
   const token = session?.session?.token ?? ""
 
@@ -32,7 +33,7 @@ export function ReplyForm({ ticketId, onSubmit, isPending }: ReplyFormProps) {
     formState: { errors },
   } = useForm<ReplyFormData>({
     resolver: zodResolver(replySchema) as Resolver<ReplyFormData>,
-    defaultValues: { body: "" },
+    defaultValues: { body: defaultValue ?? "" },
   })
 
   const currentBody = useWatch({ control, name: "body" })
