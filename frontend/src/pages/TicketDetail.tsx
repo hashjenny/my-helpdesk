@@ -1,11 +1,11 @@
 import { useParams, Link } from "react-router-dom"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useAuth } from "@/hooks/useAuth"
-import { fetchTicket, updateTicket, addResponse, summarizeTicket } from "../lib/api/tickets"
+import { fetchTicket, updateTicket, addResponse, summarizeTicket, classifyTicket, suggestReplies } from "../lib/api/tickets"
 import { fetchAgents } from "../lib/api/users"
 import type { UpdateTicketInput, TicketStatus, TicketCategory } from "@helpdesk/shared"
-import { RefreshCw } from "lucide-react"
+import { RefreshCw, Sparkles } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { TicketResponses, ReplyForm, EmailBadge } from "@/components/tickets"
@@ -53,6 +53,10 @@ export function TicketDetail() {
   const [summary, setSummary] = useState<string | null>(null)
   const [isSummaryLoading, setIsSummaryLoading] = useState(false)
   const [summaryError, setSummaryError] = useState(false)
+  const [suggestedCategory, setSuggestedCategory] = useState<"GENERAL" | "TECHNICAL" | "REFUND" | null>(null)
+  const [isClassifying, setIsClassifying] = useState(false)
+  const [suggestedReplies, setSuggestedReplies] = useState<string[]>([])
+  const [isSuggestingReplies, setIsSuggestingReplies] = useState(false)
 
   const handleGenerateSummary = async () => {
     if (!id || !token) return
@@ -67,6 +71,45 @@ export function TicketDetail() {
       setIsSummaryLoading(false)
     }
   }
+
+  const handleClassify = async () => {
+    if (!id || !token) return
+    setIsClassifying(true)
+    try {
+      const result = await classifyTicket(id, token)
+      setSuggestedCategory(result.category)
+    } catch {
+      // silently fail
+    } finally {
+      setIsClassifying(false)
+    }
+  }
+
+  const handleSuggestReplies = async () => {
+    if (!id || !token) return
+    setIsSuggestingReplies(true)
+    try {
+      const result = await suggestReplies(id, token)
+      setSuggestedReplies(result.replies)
+    } catch {
+      // silently fail
+    } finally {
+      setIsSuggestingReplies(false)
+    }
+  }
+
+  const applySuggestedCategory = () => {
+    if (suggestedCategory) {
+      handleCategoryChange(suggestedCategory)
+      setSuggestedCategory(null)
+    }
+  }
+
+  useEffect(() => {
+    if (ticket && ticket.category === "GENERAL" && !suggestedCategory) {
+      handleClassify()
+    }
+  }, [ticket?.id])
 
   const isAdmin = session?.user?.role === "ADMIN"
 
@@ -180,6 +223,34 @@ export function TicketDetail() {
 
           <Separator />
 
+          <div className="flex items-center gap-2 mb-2">
+            <button
+              onClick={handleSuggestReplies}
+              disabled={isSuggestingReplies}
+              className="text-sm text-purple-600 hover:text-purple-800 flex items-center gap-1"
+            >
+              <Sparkles className="w-4 h-4" />
+              {isSuggestingReplies ? "生成中..." : "AI 推荐回复"}
+            </button>
+          </div>
+
+          {suggestedReplies.length > 0 && (
+            <div className="mb-3 p-3 bg-purple-50 border border-purple-200 rounded-md">
+              <p className="text-xs font-medium text-purple-700 mb-2">推荐回复：</p>
+              <div className="flex flex-wrap gap-2">
+                {suggestedReplies.map((reply, i) => (
+                  <button
+                    key={i}
+                    onClick={() => {}}
+                    className="text-xs text-left px-2 py-1 bg-white border border-purple-200 rounded hover:bg-purple-100 transition-colors"
+                  >
+                    {reply}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           <ReplyForm ticketId={id!} onSubmit={handleReply} isPending={responseMutation.isPending} />
         </div>
 
@@ -216,6 +287,21 @@ export function TicketDetail() {
                   <option value="TECHNICAL">Technical</option>
                   <option value="REFUND">Refund</option>
                 </select>
+                {suggestedCategory && suggestedCategory !== ticket.category && (
+                  <div className="mt-2 flex items-center gap-2">
+                    <span className="text-xs bg-purple-100 text-purple-800 px-2 py-0.5 rounded flex items-center gap-1">
+                      <Sparkles className="w-3 h-3" />
+                      AI建议: {suggestedCategory}
+                    </span>
+                    <button
+                      onClick={applySuggestedCategory}
+                      className="text-xs text-purple-600 hover:text-purple-800 underline"
+                    >
+                      应用
+                    </button>
+                  </div>
+                )}
+                {isClassifying && <span className="text-xs text-muted-foreground mt-1 block">AI分析中...</span>}
               </div>
 
               {isAdmin && agents && (
