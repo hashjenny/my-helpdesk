@@ -144,6 +144,11 @@ router.delete("/:id", requireAuth, requireRole(Role.ADMIN), async (req, res) => 
       prisma.session.deleteMany({
         where: { userId: id },
       }),
+      // Unassign all tickets assigned to this user
+      prisma.ticket.updateMany({
+        where: { assignedTo: id },
+        data: { assignedTo: null },
+      }),
     ])
     res.status(204).send()
   } catch (_error) {
