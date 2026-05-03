@@ -254,4 +254,30 @@ test.describe('Ticket Management - Core Tests', () => {
     // Verify selection was made
     await expect(assignSelect).not.toHaveValue('')
   })
+
+  // ==========================================================================
+  // CORE: AI Polish Flow
+  // ==========================================================================
+
+  test('should polish response with AI', async ({ page }) => {
+    await authPage.login(TEST_ADMIN.email, TEST_ADMIN.password)
+    await authPage.waitForAuthNavigation()
+    await page.waitForLoadState('networkidle')
+    // Navigate to ticket detail
+    await ticketListPage.goto()
+    await page.waitForLoadState('networkidle')
+    await ticketListPage.viewTicket(0)
+    await page.waitForLoadState('networkidle')
+    // Type some text
+    const testText = 'hi i need help with my account'
+    await ticketDetailPage.replyTextarea.fill(testText)
+    // Click polish button
+    await page.locator('button:has-text("Polish with AI")').click()
+    // Wait for polishing to complete (button text changes back)
+    await expect(page.locator('button:has-text("Polish with AI")')).toBeEnabled({ timeout: 15000 })
+    // Verify textarea has content (polished text should be different and non-empty)
+    const polishedContent = await ticketDetailPage.replyTextarea.inputValue()
+    expect(polishedContent.length).toBeGreaterThan(0)
+    expect(polishedContent).not.toBe(testText)
+  })
 })
