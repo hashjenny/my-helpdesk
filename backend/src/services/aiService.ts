@@ -1,4 +1,4 @@
-const MINIMAX_API_URL = "https://api.minimax.chat/v1/text/chatcompletion_pro"
+const MINIMAX_API_URL = "https://api.minimax.io/v1/chat/completions"
 
 interface PolishResult {
   polished: string
@@ -33,14 +33,16 @@ export const aiService = {
         "Authorization": `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "abab6.5s-chat",
+        model: "MiniMax-M2.7",
         messages: [
           {
             role: "system",
+            name: "MiniMax AI",
             content: `You are a professional customer support agent. Polish the user's reply to make it more professional, friendly, and well-structured. Keep the same meaning but improve clarity, grammar, and tone. Only return the polished text, nothing else.`
           },
           {
             role: "user",
+            name: "User",
             content: text
           }
         ],
