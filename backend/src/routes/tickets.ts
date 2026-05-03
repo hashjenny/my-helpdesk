@@ -147,4 +147,21 @@ router.post("/:id/responses", requireAuth, async (req, res) => {
   }
 })
 
+// POST /api/tickets/:id/polish - Polish response text with AI
+router.post("/:id/polish", requireAuth, async (req, res) => {
+  const { body } = req.body
+  if (!body || typeof body !== "string" || body.trim().length === 0) {
+    res.status(400).json({ error: "body is required" })
+    return
+  }
+
+  try {
+    const { aiService } = await import("../services/aiService.js")
+    const result = await aiService.polishText(body)
+    res.json(result)
+  } catch (_error) {
+    res.status(500).json({ error: "Failed to polish text" })
+  }
+})
+
 export default router
