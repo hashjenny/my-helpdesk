@@ -88,12 +88,12 @@ export async function addResponse(
   return response.data
 }
 
-export async function polishTicketResponse(id: string, body: string, token: string) {
+export async function polishTicketResponse(
+  id: string,
+  body: string,
+  token: string
+): Promise<{ polished: string }> {
   const instance = createAxiosInstance(token)
-  const response = await instance.post(
-    `/api/tickets/${id}/polish`,
-    { body },
-    { headers: { Authorization: `Bearer ${token}` } }
-  )
+  const response = await instance.post(`/api/tickets/${id}/polish`, { body })
   return response.data as { polished: string }
 }
