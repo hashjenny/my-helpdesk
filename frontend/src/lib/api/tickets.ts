@@ -87,3 +87,13 @@ export async function addResponse(
   const response = await instance.post(`/api/tickets/${ticketId}/responses`, data)
   return response.data
 }
+
+export async function polishTicketResponse(id: string, body: string, token: string) {
+  const instance = createAxiosInstance(token)
+  const response = await instance.post(
+    `/api/tickets/${id}/polish`,
+    { body },
+    { headers: { Authorization: `Bearer ${token}` } }
+  )
+  return response.data as { polished: string }
+}
