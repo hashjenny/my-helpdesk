@@ -124,7 +124,7 @@ export function TicketDetail() {
 
           <Separator />
 
-          <ReplyForm onSubmit={handleReply} isPending={responseMutation.isPending} />
+          <ReplyForm ticketId={id!} onSubmit={handleReply} isPending={responseMutation.isPending} />
         </div>
 
         {/* Right column - Controls */}

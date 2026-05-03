@@ -10,6 +10,12 @@ import { ReplyForm } from "./ReplyForm"
 import { EmailBadge } from "./EmailBadge"
 import { TicketResponses } from "./TicketResponses"
 import type { Ticket, TicketResponse } from "@helpdesk/shared"
+import { AuthContext } from "@/context/auth-context"
+
+const mockSession = {
+  user: { id: "1", name: "Test User", email: "test@test.com", role: "AGENT" as const },
+  session: { id: "session-1", token: "test-token", expiresAt: new Date() },
+}
 
 const createQueryClient = () =>
   new QueryClient({ defaultOptions: { queries: { retry: false } } })
@@ -291,8 +297,22 @@ describe("CreateTicketForm", () => {
 })
 
 describe("ReplyForm", () => {
+  const createTestQueryClient = () =>
+    new QueryClient({ defaultOptions: { queries: { retry: false } } })
+
+  const renderWithProviders = (ui: React.ReactElement) =>
+    render(
+      <MemoryRouter>
+        <QueryClientProvider client={createTestQueryClient()}>
+          <AuthContext.Provider value={{ session: mockSession, isPending: false, signOut: vi.fn() }}>
+            {ui}
+          </AuthContext.Provider>
+        </QueryClientProvider>
+      </MemoryRouter>
+    )
+
   it("renders reply textarea and submit button", () => {
-    render(<ReplyForm onSubmit={() => {}} isPending={false} />)
+    renderWithProviders(<ReplyForm ticketId="1" onSubmit={() => {}} isPending={false} />)
     expect(screen.getByLabelText(/your response/i)).toBeInTheDocument()
     expect(screen.getByRole("button", { name: /send response/i })).toBeInTheDocument()
   })
@@ -300,7 +320,7 @@ describe("ReplyForm", () => {
   it("calls onSubmit with reply body", async () => {
     const user = userEvent.setup()
     const onSubmit = vi.fn()
-    render(<ReplyForm onSubmit={onSubmit} isPending={false} />)
+    renderWithProviders(<ReplyForm ticketId="1" onSubmit={onSubmit} isPending={false} />)
     const textarea = screen.getByLabelText(/your response/i)
     await user.type(textarea, "This is a reply")
     await user.click(screen.getByRole("button", { name: /send response/i }))
@@ -308,7 +328,7 @@ describe("ReplyForm", () => {
   })
 
   it("disables submit button when isPending", () => {
-    render(<ReplyForm onSubmit={() => {}} isPending={true} />)
+    renderWithProviders(<ReplyForm ticketId="1" onSubmit={() => {}} isPending={true} />)
     expect(screen.getByRole("button", { name: /sending/i })).toBeDisabled()
   })
 })
