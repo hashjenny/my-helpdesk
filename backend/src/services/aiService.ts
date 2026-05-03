@@ -100,14 +100,29 @@ ${responseList ? `回复记录：\n${responseList}` : ""}
 - 已尝试步骤：...
 - 当前状态：...`
 
-    const message = await client.messages.create({
-      model: "MiniMax-M2.7",
-      max_tokens: 300,
-      system: "你是一个专业的客服支持助手，负责总结工单要点。",
-      messages: [
-        { role: "user", content: prompt }
-      ],
-    })
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 30_000)
+
+    let message
+    try {
+      message = await client.messages.create({
+        model: "MiniMax-M2.7",
+        max_tokens: 300,
+        system: "你是一个专业的客服支持助手，负责总结工单要点。",
+        messages: [
+          { role: "user", content: prompt }
+        ],
+        signal: controller.signal,
+      })
+    } catch (error) {
+      clearTimeout(timeout)
+      if (error instanceof Error && error.name === "AbortError") {
+        throw new Error("Summarization timed out after 30 seconds")
+      }
+      throw error
+    }
+
+    clearTimeout(timeout)
 
     let summary = ""
     for (const block of message.content) {
