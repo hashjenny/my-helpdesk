@@ -1,5 +1,5 @@
 import axios from "axios"
-import { API_BASE, signOut } from "./auth-client"
+import { API_BASE, signOut } from "../auth-client"
 
 const createAxiosInstance = (token: string) => {
   const instance = axios.create({

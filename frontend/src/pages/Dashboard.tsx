@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/useAuth"
 import { fetchDashboardStats, fetchDashboardRecent } from "@/lib/api/dashboard"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Link } from "react-router-dom"
-import type { TicketStatus, TicketCategory } from "@helpdesk/shared"
+import type { TicketStatus } from "@helpdesk/shared"
 
 const statusLabels: Record<TicketStatus, string> = {
   OPEN: "待处理",
@@ -11,11 +11,6 @@ const statusLabels: Record<TicketStatus, string> = {
   CLOSED: "已关闭",
 }
 
-const categoryLabels: Record<TicketCategory, string> = {
-  GENERAL: "一般咨询",
-  TECHNICAL: "技术问题",
-  REFUND: "退款",
-}
 
 export function Dashboard() {
   const { session } = useAuth()
