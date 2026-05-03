@@ -25,6 +25,13 @@ function escapeHtml(str: string): string {
     .replace(/'/g, "&#039;")
 }
 
+// Authorization helper: agents can only access tickets assigned to them
+function checkTicketAccess(ticket: { assignedTo: string | null }, user: { id: string; role: string } | undefined): boolean {
+  if (!user) return false
+  if (user.role !== "AGENT") return true
+  return ticket.assignedTo === user.id
+}
+
 // GET /api/tickets - List tickets
 router.get("/", requireAuth, async (req, res) => {
   try {
@@ -223,7 +230,7 @@ router.post("/:id/summarize", requireAuth, async (req, res) => {
       return
     }
     // Agents can only see tickets assigned to them
-    if (req.user?.role === "AGENT" && ticket.assignedTo !== req.user?.id) {
+    if (!checkTicketAccess(ticket, req.user)) {
       res.status(403).json({ error: "Access denied" })
       return
     }
@@ -253,7 +260,7 @@ router.post("/:id/classify", requireAuth, async (req, res) => {
       res.status(404).json({ error: "Ticket not found" })
       return
     }
-    if (req.user?.role === "AGENT" && ticket.assignedTo !== req.user?.id) {
+    if (!checkTicketAccess(ticket, req.user)) {
       res.status(403).json({ error: "Access denied" })
       return
     }
@@ -275,7 +282,7 @@ router.get("/:id/suggested-reply", requireAuth, async (req, res) => {
       res.status(404).json({ error: "Ticket not found" })
       return
     }
-    if (req.user?.role === "AGENT" && ticket.assignedTo !== req.user?.id) {
+    if (!checkTicketAccess(ticket, req.user)) {
       res.status(403).json({ error: "Access denied" })
       return
     }
