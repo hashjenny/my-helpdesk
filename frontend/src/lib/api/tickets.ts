@@ -103,3 +103,15 @@ export async function summarizeTicket(id: string, token: string): Promise<{ summ
   const response = await instance.post(`/api/tickets/${id}/summarize`, {})
   return response.data as { summary: string }
 }
+
+export async function classifyTicket(id: string, token: string): Promise<{ category: "GENERAL" | "TECHNICAL" | "REFUND" }> {
+  const instance = createAxiosInstance(token)
+  const response = await instance.post(`/api/tickets/${id}/classify`)
+  return response.data as { category: "GENERAL" | "TECHNICAL" | "REFUND" }
+}
+
+export async function suggestReplies(id: string, token: string): Promise<{ replies: string[] }> {
+  const instance = createAxiosInstance(token)
+  const response = await instance.get(`/api/tickets/${id}/suggested-reply`)
+  return response.data as { replies: string[] }
+}
