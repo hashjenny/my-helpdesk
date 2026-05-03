@@ -81,7 +81,7 @@ export const aiService = {
 
     const client = new Anthropic({
       apiKey: apiKey,
-      baseURL: "https://api.minimax.com/anthropic",
+      baseURL: "https://api.minimaxi.com/anthropic",
     })
 
     // Build prompt
