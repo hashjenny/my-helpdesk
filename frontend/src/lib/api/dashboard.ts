@@ -1,5 +1,5 @@
 import axios from "axios"
-import { API_BASE } from "../auth-client"
+import { API_BASE, signOut } from "./auth-client"
 
 const createAxiosInstance = (token: string) => {
   const instance = axios.create({
@@ -9,6 +9,17 @@ const createAxiosInstance = (token: string) => {
       "Content-Type": "application/json",
     },
   })
+
+  instance.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+      if (error?.response?.status === 401) {
+        await signOut()
+      }
+      return Promise.reject(error)
+    }
+  )
+
   return instance
 }
 
