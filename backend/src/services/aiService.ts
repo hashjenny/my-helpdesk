@@ -105,15 +105,19 @@ ${responseList ? `回复记录：\n${responseList}` : ""}
 
     let message
     try {
-      message = await client.messages.create({
-        model: "MiniMax-M2.7",
-        max_tokens: 300,
-        system: "你是一个专业的客服支持助手，负责总结工单要点。",
-        messages: [
-          { role: "user", content: prompt }
-        ],
-        signal: controller.signal,
-      })
+      message = await client.messages.create(
+        {
+          model: "MiniMax-M2.7",
+          max_tokens: 300,
+          system: "你是一个专业的客服支持助手，负责总结工单要点。",
+          messages: [
+            { role: "user", content: prompt }
+          ],
+        },
+        {
+          signal: controller.signal,
+        }
+      )
     } catch (error) {
       clearTimeout(timeout)
       if (error instanceof Error && error.name === "AbortError") {

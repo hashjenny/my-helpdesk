@@ -182,7 +182,11 @@ router.post("/:id/summarize", requireAuth, async (req, res) => {
     const result = await aiService.summarizeTicket({
       subject: ticket.subject,
       body: ticket.body,
-      responses: ticket.responses ?? [],
+      responses: (ticket.responses ?? []).map(r => ({
+        body: r.body,
+        isCustomerReply: r.isCustomerReply,
+        createdAt: r.createdAt instanceof Date ? r.createdAt.toISOString() : String(r.createdAt),
+      })),
     })
     res.json(result)
   } catch (error) {

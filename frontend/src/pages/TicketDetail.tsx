@@ -118,36 +118,36 @@ export function TicketDetail() {
                 {new Date(ticket.createdAt).toLocaleString()}
               </span>
             </div>
-            <Card className="bg-blue-50 border-blue-200 mt-2">
-              <CardContent className="pt-3 pb-3">
-                <div className="flex items-start gap-2">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-sm font-medium text-blue-700">AI 总结</span>
-                      <button
-                        onClick={handleRefreshSummary}
-                        disabled={isSummaryLoading}
-                        className="p-1 hover:bg-blue-100 rounded transition-colors"
-                        title="刷新总结"
-                      >
-                        <RefreshCw className={`w-3.5 h-3.5 text-blue-600 ${isSummaryLoading ? "animate-spin" : ""}`} />
-                      </button>
-                    </div>
-                    {isSummaryLoading ? (
-                      <p className="text-sm text-muted-foreground">生成中...</p>
-                    ) : isSummaryError ? (
-                      <p className="text-sm text-destructive">生成失败，请重试</p>
-                    ) : summaryData?.summary ? (
-                      <p className="text-sm text-blue-900 whitespace-pre-wrap">{summaryData.summary}</p>
-                    ) : (
-                      <p className="text-sm text-muted-foreground">暂无总结</p>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            </div>
           </div>
+
+          <Card className="bg-blue-50 border-blue-200 mt-2">
+            <CardContent className="pt-3 pb-3">
+              <div className="flex items-start gap-2">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-sm font-medium text-blue-700">AI 总结</span>
+                    <button
+                      onClick={handleRefreshSummary}
+                      disabled={isSummaryLoading}
+                      className="p-1 hover:bg-blue-100 rounded transition-colors"
+                      title="刷新总结"
+                    >
+                      <RefreshCw className={`w-3.5 h-3.5 text-blue-600 ${isSummaryLoading ? "animate-spin" : ""}`} />
+                    </button>
+                  </div>
+                  {isSummaryLoading ? (
+                    <p className="text-sm text-muted-foreground">生成中...</p>
+                  ) : isSummaryError ? (
+                    <p className="text-sm text-destructive">生成失败，请重试</p>
+                  ) : summaryData?.summary ? (
+                    <p className="text-sm text-blue-900 whitespace-pre-wrap">{summaryData.summary}</p>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">暂无总结</p>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
           <Card>
             <CardContent className="pt-4">
