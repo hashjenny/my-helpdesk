@@ -21,19 +21,19 @@ export function Dashboard() {
   const { session } = useAuth()
   const token = session?.session?.token ?? ""
 
-  const { data: stats, isLoading: statsLoading } = useQuery({
+  const { data: stats, isLoading: statsLoading, isError: statsError } = useQuery({
     queryKey: ["dashboard", "stats"],
     queryFn: () => fetchDashboardStats(token),
     enabled: Boolean(token),
+    staleTime: 30_000,
   })
 
-  const { data: recent, isLoading: recentLoading } = useQuery({
+  const { data: recent, isLoading: recentLoading, isError: recentError } = useQuery({
     queryKey: ["dashboard", "recent"],
     queryFn: () => fetchDashboardRecent(token),
     enabled: Boolean(token),
+    staleTime: 30_000,
   })
-
-  if (statsLoading) return <div className="p-6">加载中...</div>
 
   const statCards = [
     { label: "总工单", value: stats?.total ?? 0, color: "bg-blue-50 border-blue-200" },
@@ -58,7 +58,13 @@ export function Dashboard() {
           <Card key={card.label} className={card.color}>
             <CardContent className="pt-4">
               <p className="text-sm text-muted-foreground">{card.label}</p>
-              <p className="text-2xl font-bold mt-1">{card.value}</p>
+              {statsLoading ? (
+                <div className="h-8 bg-black/10 animate-pulse rounded mt-1" />
+              ) : statsError ? (
+                <p className="text-sm text-destructive mt-1">加载失败</p>
+              ) : (
+                <p className="text-2xl font-bold mt-1">{card.value}</p>
+              )}
             </CardContent>
           </Card>
         ))}
@@ -70,7 +76,13 @@ export function Dashboard() {
           <Card key={card.key} className={card.color}>
             <CardContent className="pt-4">
               <p className="text-sm text-muted-foreground">{card.label}</p>
-              <p className="text-2xl font-bold mt-1">{stats?.byCategory[card.key] ?? 0}</p>
+              {statsLoading ? (
+                <span className="h-6 bg-black/10 animate-pulse rounded mt-1 inline-block w-8" />
+              ) : statsError ? (
+                <p className="text-sm text-destructive mt-1">-</p>
+              ) : (
+                <p className="text-2xl font-bold mt-1">{stats?.byCategory[card.key] ?? 0}</p>
+              )}
             </CardContent>
           </Card>
         ))}
@@ -84,6 +96,8 @@ export function Dashboard() {
         <CardContent>
           {recentLoading ? (
             <p className="text-sm text-muted-foreground">加载中...</p>
+          ) : recentError ? (
+            <p className="text-sm text-destructive">加载失败</p>
           ) : recent?.tickets.length === 0 ? (
             <p className="text-sm text-muted-foreground">暂无工单</p>
           ) : (
