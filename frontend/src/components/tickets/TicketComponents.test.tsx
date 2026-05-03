@@ -8,7 +8,8 @@ import { TicketFilters } from "./TicketFilters"
 import { CreateTicketForm } from "./CreateTicketForm"
 import { ReplyForm } from "./ReplyForm"
 import { EmailBadge } from "./EmailBadge"
-import type { Ticket } from "@helpdesk/shared"
+import { TicketResponses } from "./TicketResponses"
+import type { Ticket, TicketResponse } from "@helpdesk/shared"
 
 const createQueryClient = () =>
   new QueryClient({ defaultOptions: { queries: { retry: false } } })
@@ -44,6 +45,23 @@ const mockTickets: Ticket[] = [
     assignedTo: null,
     createdAt: new Date("2026-05-02").toISOString(),
     updatedAt: new Date("2026-05-02").toISOString(),
+  },
+]
+
+const mockResponses: TicketResponse[] = [
+  {
+    id: "r1",
+    ticketId: "1",
+    body: "This is an agent response",
+    isCustomerReply: false,
+    createdAt: new Date("2026-05-01T10:00:00").toISOString(),
+  },
+  {
+    id: "r2",
+    ticketId: "1",
+    body: "This is a customer reply",
+    isCustomerReply: true,
+    createdAt: new Date("2026-05-01T11:00:00").toISOString(),
   },
 ]
 
@@ -292,5 +310,30 @@ describe("ReplyForm", () => {
   it("disables submit button when isPending", () => {
     render(<ReplyForm onSubmit={() => {}} isPending={true} />)
     expect(screen.getByRole("button", { name: /sending/i })).toBeDisabled()
+  })
+})
+
+describe("TicketResponses", () => {
+  it("renders empty state when no responses", () => {
+    render(<TicketResponses responses={[]} />)
+    expect(screen.getByText(/no responses yet/i)).toBeInTheDocument()
+  })
+
+  it("renders response list", () => {
+    render(<TicketResponses responses={mockResponses} />)
+    expect(screen.getByText("This is an agent response")).toBeInTheDocument()
+    expect(screen.getByText("This is a customer reply")).toBeInTheDocument()
+  })
+
+  it("shows Agent label for agent responses", () => {
+    render(<TicketResponses responses={mockResponses} />)
+    const agentLabel = screen.getAllByText("Agent")
+    expect(agentLabel).toHaveLength(1)
+  })
+
+  it("shows Customer label for customer replies", () => {
+    render(<TicketResponses responses={mockResponses} />)
+    const customerLabel = screen.getAllByText("Customer")
+    expect(customerLabel).toHaveLength(1)
   })
 })

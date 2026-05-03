@@ -264,9 +264,12 @@ See `plan.md` for full feature breakdown across 8 phases.
 | `CreateTicketForm` | ✅ 已覆盖表单字段、提交、取消、pending 状态 |
 | `ReplyForm` | ✅ 已覆盖 textarea、提交按钮、pending 状态 |
 | `EmailBadge` | ✅ 已覆盖渲染/null 情况 |
+| `TicketResponses` | ✅ 已覆盖空状态、响应列表、Agent/Customer 标签 |
 
 **E2E 测试应覆盖（组件测试未覆盖）：**
 - 端到端用户流程（登录 → 操作 → 结果）
 - 与真实后端交互的完整 CRUD
 - 页面间导航
 - 排序与真实数据的集成
+- 状态/类别变更（需刷新页面验证）
+- 坐席分配（admin 专属功能）

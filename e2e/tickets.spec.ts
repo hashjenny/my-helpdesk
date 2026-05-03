@@ -134,4 +134,124 @@ test.describe('Ticket Management - Core Tests', () => {
     await page.waitForLoadState('networkidle')
     await expect(page.locator('table tbody tr').first()).toBeVisible()
   })
+
+  // ==========================================================================
+  // CORE: Search, Sort, Delete, Navigation (Tasks 5-8)
+  // ==========================================================================
+
+  test('should search tickets by keyword', async ({ page }) => {
+    await authPage.login(TEST_ADMIN.email, TEST_ADMIN.password)
+    await authPage.waitForAuthNavigation()
+    await page.waitForLoadState('networkidle')
+    await ticketListPage.goto()
+    await page.waitForLoadState('networkidle')
+    const firstSubject = await page.locator('table tbody tr td').first().textContent()
+    if (firstSubject && firstSubject.length > 3) {
+      const searchTerm = firstSubject.substring(0, 5)
+      await ticketListPage.searchInput.fill(searchTerm)
+      await page.waitForLoadState('networkidle')
+      const rowCount = await ticketListPage.tableRows.count()
+      expect(rowCount).toBeGreaterThan(0)
+    }
+  })
+
+  test('should sort tickets by column', async ({ page }) => {
+    await authPage.login(TEST_ADMIN.email, TEST_ADMIN.password)
+    await authPage.waitForAuthNavigation()
+    await page.waitForLoadState('networkidle')
+    await ticketListPage.goto()
+    await page.waitForLoadState('networkidle')
+    await page.locator('th').filter({ hasText: 'Subject' }).click()
+    await page.waitForLoadState('networkidle')
+    await page.locator('th').filter({ hasText: 'Subject' }).click()
+    await page.waitForLoadState('networkidle')
+    await expect(page.locator('table tbody tr').first()).toBeVisible()
+  })
+
+  test('should delete a ticket', async ({ page }) => {
+    await authPage.login(TEST_ADMIN.email, TEST_ADMIN.password)
+    await authPage.waitForAuthNavigation()
+    await page.waitForLoadState('networkidle')
+    await ticketListPage.goto()
+    await page.waitForLoadState('networkidle')
+    const initialCount = await ticketListPage.tableRows.count()
+    await ticketListPage.deleteTicket(0)
+    await page.waitForLoadState('networkidle')
+    const newCount = await page.locator('table tbody tr').count()
+    expect(newCount).toBeLessThan(initialCount)
+  })
+
+  test('should navigate to ticket detail', async ({ page }) => {
+    await authPage.login(TEST_ADMIN.email, TEST_ADMIN.password)
+    await authPage.waitForAuthNavigation()
+    await page.waitForLoadState('networkidle')
+    await ticketListPage.goto()
+    await page.waitForLoadState('networkidle')
+    await ticketListPage.viewTicket(0)
+    await page.waitForLoadState('networkidle')
+    await expect(page.locator('text=Add Response')).toBeVisible()
+    expect(page.url()).toContain('/tickets/')
+  })
+
+  // ==========================================================================
+  // CORE: Ticket Detail - Status & Category Change
+  // ==========================================================================
+
+  test('should change ticket status from detail page', async ({ page }) => {
+    await authPage.login(TEST_ADMIN.email, TEST_ADMIN.password)
+    await authPage.waitForAuthNavigation()
+    await page.waitForLoadState('networkidle')
+    // Navigate to ticket detail
+    await ticketListPage.goto()
+    await page.waitForLoadState('networkidle')
+    await ticketListPage.viewTicket(0)
+    await page.waitForLoadState('networkidle')
+    // Change status to CLOSED (avoid RESOLVED which may already be set)
+    await ticketDetailPage.changeStatus('CLOSED')
+    await page.waitForLoadState('networkidle')
+    // Verify status badge shows CLOSED
+    await expect(page.locator('span[class*="bg-gray-100"]:has-text("CLOSED")')).toBeVisible()
+  })
+
+  test('should change ticket category from detail page', async ({ page }) => {
+    await authPage.login(TEST_ADMIN.email, TEST_ADMIN.password)
+    await authPage.waitForAuthNavigation()
+    await page.waitForLoadState('networkidle')
+    // Navigate to ticket detail
+    await ticketListPage.goto()
+    await page.waitForLoadState('networkidle')
+    await ticketListPage.viewTicket(0)
+    await page.waitForLoadState('networkidle')
+    // Use the category select (second select on page)
+    const categorySelect = page.locator('select').nth(1)
+    await expect(categorySelect).toBeVisible()
+    // Get current category and switch to a different one
+    const currentCategory = await categorySelect.inputValue()
+    const newCategory = currentCategory === 'GENERAL' ? 'TECHNICAL' : 'GENERAL'
+    await categorySelect.selectOption(newCategory)
+    await page.waitForLoadState('networkidle')
+    // Verify the select shows the new value
+    await expect(categorySelect).toHaveValue(newCategory)
+  })
+
+  test('should assign ticket to agent as admin', async ({ page }) => {
+    await authPage.login(TEST_ADMIN.email, TEST_ADMIN.password)
+    await authPage.waitForAuthNavigation()
+    await page.waitForLoadState('networkidle')
+    // Navigate to ticket detail
+    await ticketListPage.goto()
+    await page.waitForLoadState('networkidle')
+    await ticketListPage.viewTicket(0)
+    await page.waitForLoadState('networkidle')
+    // Check if assigned to select exists and has agents (admin only)
+    const assignSelect = page.locator('select').last()
+    await expect(assignSelect).toBeVisible()
+    // Verify there are options beyond "Unassigned"
+    const options = await assignSelect.locator('option').all()
+    expect(options.length).toBeGreaterThan(1)
+    // Select second option (first is "Unassigned")
+    await assignSelect.selectOption({ index: 1 })
+    // Verify selection was made
+    await expect(assignSelect).not.toHaveValue('')
+  })
 })
