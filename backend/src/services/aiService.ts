@@ -23,6 +23,9 @@ export const aiService = {
       throw new Error("MINIMAX_API_KEY not configured")
     }
 
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 30_000)
+
     const response = await fetch(MINIMAX_API_URL, {
       method: "POST",
       headers: {
@@ -43,7 +46,10 @@ export const aiService = {
         ],
         temperature: 0.7,
       }),
+      signal: controller.signal,
     })
+
+    clearTimeout(timeout)
 
     if (!response.ok) {
       throw new Error(`MiniMax API error: ${response.status}`)
