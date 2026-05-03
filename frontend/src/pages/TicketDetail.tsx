@@ -49,7 +49,7 @@ export function TicketDetail() {
     queryFn: () => fetchAgents(token),
   })
 
-  const { data: summaryData, isLoading: isSummaryLoading } = useQuery({
+  const { data: summaryData, isLoading: isSummaryLoading, isError: isSummaryError } = useQuery({
     queryKey: ["ticket-summary", id],
     queryFn: () => summarizeTicket(id!, token),
     enabled: Boolean(id && token),
@@ -135,6 +135,8 @@ export function TicketDetail() {
                     </div>
                     {isSummaryLoading ? (
                       <p className="text-sm text-muted-foreground">生成中...</p>
+                    ) : isSummaryError ? (
+                      <p className="text-sm text-destructive">生成失败，请重试</p>
                     ) : summaryData?.summary ? (
                       <p className="text-sm text-blue-900 whitespace-pre-wrap">{summaryData.summary}</p>
                     ) : (
