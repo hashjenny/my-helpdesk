@@ -1,9 +1,10 @@
 import { useParams, Link } from "react-router-dom"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useAuth } from "@/hooks/useAuth"
-import { fetchTicket, updateTicket, addResponse } from "../lib/api/tickets"
+import { fetchTicket, updateTicket, addResponse, summarizeTicket } from "../lib/api/tickets"
 import { fetchAgents } from "../lib/api/users"
 import type { UpdateTicketInput, TicketStatus, TicketCategory } from "@helpdesk/shared"
+import { RefreshCw } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { TicketResponses, ReplyForm, EmailBadge } from "@/components/tickets"
@@ -48,6 +49,12 @@ export function TicketDetail() {
     queryFn: () => fetchAgents(token),
   })
 
+  const { data: summaryData, isLoading: isSummaryLoading } = useQuery({
+    queryKey: ["ticket-summary", id],
+    queryFn: () => summarizeTicket(id!, token),
+    enabled: Boolean(id && token),
+  })
+
   const isAdmin = session?.user?.role === "ADMIN"
 
   const handleStatusChange = (newStatus: TicketStatus) => {
@@ -64,6 +71,10 @@ export function TicketDetail() {
 
   const handleReply = (body: string) => {
     responseMutation.mutate(body)
+  }
+
+  const handleRefreshSummary = () => {
+    queryClient.invalidateQueries({ queryKey: ["ticket-summary", id] })
   }
 
   if (isLoading) {
@@ -106,6 +117,33 @@ export function TicketDetail() {
               <span className="text-sm text-muted-foreground">
                 {new Date(ticket.createdAt).toLocaleString()}
               </span>
+            </div>
+            <Card className="bg-blue-50 border-blue-200 mt-2">
+              <CardContent className="pt-3 pb-3">
+                <div className="flex items-start gap-2">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-sm font-medium text-blue-700">AI 总结</span>
+                      <button
+                        onClick={handleRefreshSummary}
+                        disabled={isSummaryLoading}
+                        className="p-1 hover:bg-blue-100 rounded transition-colors"
+                        title="刷新总结"
+                      >
+                        <RefreshCw className={`w-3.5 h-3.5 text-blue-600 ${isSummaryLoading ? "animate-spin" : ""}`} />
+                      </button>
+                    </div>
+                    {isSummaryLoading ? (
+                      <p className="text-sm text-muted-foreground">生成中...</p>
+                    ) : summaryData?.summary ? (
+                      <p className="text-sm text-blue-900 whitespace-pre-wrap">{summaryData.summary}</p>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">暂无总结</p>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
             </div>
           </div>
 
