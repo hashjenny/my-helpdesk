@@ -1,5 +1,6 @@
 import { useParams, Link } from "react-router-dom"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { useState } from "react"
 import { useAuth } from "@/hooks/useAuth"
 import { fetchTicket, updateTicket, addResponse, summarizeTicket } from "../lib/api/tickets"
 import { fetchAgents } from "../lib/api/users"
@@ -49,11 +50,23 @@ export function TicketDetail() {
     queryFn: () => fetchAgents(token),
   })
 
-  const { data: summaryData, isLoading: isSummaryLoading, isError: isSummaryError } = useQuery({
-    queryKey: ["ticket-summary", id],
-    queryFn: () => summarizeTicket(id!, token),
-    enabled: Boolean(id && token),
-  })
+  const [summary, setSummary] = useState<string | null>(null)
+  const [isSummaryLoading, setIsSummaryLoading] = useState(false)
+  const [summaryError, setSummaryError] = useState(false)
+
+  const handleGenerateSummary = async () => {
+    if (!id || !token) return
+    setIsSummaryLoading(true)
+    setSummaryError(false)
+    try {
+      const result = await summarizeTicket(id, token)
+      setSummary(result.summary)
+    } catch {
+      setSummaryError(true)
+    } finally {
+      setIsSummaryLoading(false)
+    }
+  }
 
   const isAdmin = session?.user?.role === "ADMIN"
 
@@ -71,10 +84,6 @@ export function TicketDetail() {
 
   const handleReply = (body: string) => {
     responseMutation.mutate(body)
-  }
-
-  const handleRefreshSummary = () => {
-    queryClient.invalidateQueries({ queryKey: ["ticket-summary", id] })
   }
 
   if (isLoading) {
@@ -126,23 +135,30 @@ export function TicketDetail() {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="text-sm font-medium text-blue-700">AI 总结</span>
-                    <button
-                      onClick={handleRefreshSummary}
-                      disabled={isSummaryLoading}
-                      className="p-1 hover:bg-blue-100 rounded transition-colors"
-                      title="刷新总结"
-                    >
-                      <RefreshCw className={`w-3.5 h-3.5 text-blue-600 ${isSummaryLoading ? "animate-spin" : ""}`} />
-                    </button>
+                    {summary && (
+                      <button
+                        onClick={handleGenerateSummary}
+                        disabled={isSummaryLoading}
+                        className="p-1 hover:bg-blue-100 rounded transition-colors"
+                        title="刷新总结"
+                      >
+                        <RefreshCw className={`w-3.5 h-3.5 text-blue-600 ${isSummaryLoading ? "animate-spin" : ""}`} />
+                      </button>
+                    )}
                   </div>
                   {isSummaryLoading ? (
                     <p className="text-sm text-muted-foreground">生成中...</p>
-                  ) : isSummaryError ? (
+                  ) : summaryError ? (
                     <p className="text-sm text-destructive">生成失败，请重试</p>
-                  ) : summaryData?.summary ? (
-                    <p className="text-sm text-blue-900 whitespace-pre-wrap">{summaryData.summary}</p>
+                  ) : summary ? (
+                    <p className="text-sm text-blue-900 whitespace-pre-wrap">{summary}</p>
                   ) : (
-                    <p className="text-sm text-muted-foreground">暂无总结</p>
+                    <button
+                      onClick={handleGenerateSummary}
+                      className="text-sm text-blue-600 hover:text-blue-800 underline"
+                    >
+                      点击生成 AI 总结
+                    </button>
                   )}
                 </div>
               </div>
