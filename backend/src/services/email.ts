@@ -1,6 +1,7 @@
 import { Resend } from "resend"
 import { prisma } from "../lib/prisma.js"
 import { ticketService } from "./ticketService.js"
+import { getQueue } from "../lib/queue.js"
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -67,6 +68,9 @@ export const emailService = {
       category: "GENERAL",
       supportEmail,
     })
+
+    const queue = getQueue()
+    await queue.send("classify-ticket", { ticketId: ticket.id, subject, body })
 
     return { ticketId: ticket.id, isReply: false }
   },
