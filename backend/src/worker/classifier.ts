@@ -6,6 +6,7 @@ import { ticketService } from "../services/ticketService.js"
 export async function startClassifierWorker() {
   const boss = getQueue()
   await boss.start()
+  await boss.createQueue("classify-ticket")
 
   await boss.work("classify-ticket", async (jobs: Job<{ ticketId: string; subject: string; body: string }>[]) => {
     const job = jobs[0]
