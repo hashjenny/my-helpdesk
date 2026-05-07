@@ -33,6 +33,7 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "express-rate-limit": "^8.3.2",
+    "pg-boss": "^12.18.2",
     "prisma": "^5.22.0",
     "react": "^19.2.5",
     "resend": "^6.12.2",
