@@ -70,7 +70,7 @@ export const emailService = {
     })
 
     const queue = getQueue()
-    await queue.send("classify-ticket", { ticketId: ticket.id, subject, body }, { retryBackoff: true, retryDelay: [5, 15, 30], maxRetries: 3 })
+    await queue.send("classify-ticket", { ticketId: ticket.id, subject, body }, { retryBackoff: true })
 
     return { ticketId: ticket.id, isReply: false }
   },
