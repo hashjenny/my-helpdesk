@@ -8,6 +8,7 @@ import usersRouter from "./routes/users.js"
 import ticketsRouter from "./routes/tickets.js"
 import emailRouter from "./routes/email.js"
 import dashboardRouter from "./routes/dashboard.js"
+import { startClassifierWorker } from "./worker/classifier.js"
 
 const app = express()
 
@@ -80,6 +81,7 @@ app.use((err: any, _req: express.Request, res: express.Response, _next: express.
 
 const PORT = Number(process.env.PORT) || 3001
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`Server running on port ${PORT}`)
+  await startClassifierWorker()
 })
