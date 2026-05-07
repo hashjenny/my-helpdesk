@@ -1,3 +1,4 @@
+import type { Job } from "pg-boss"
 import { getQueue } from "../lib/queue.js"
 import { aiService } from "../services/aiService.js"
 import { ticketService } from "../services/ticketService.js"
@@ -5,7 +6,9 @@ import { ticketService } from "../services/ticketService.js"
 export async function startClassifierWorker() {
   const boss = getQueue()
 
-  await boss.work("classify-ticket", { retryBackoff: true, retryDelay: [5, 15, 30], maxRetries: 3 }, async (job) => {
+  await boss.work("classify-ticket", async (jobs: Job<{ ticketId: string; subject: string; body: string }>[]) => {
+    const job = jobs[0]
+    if (!job) return
     const { ticketId, subject, body } = job.data
     console.log(`[classifier] Processing ticket ${ticketId}`)
 
