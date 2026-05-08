@@ -45,11 +45,12 @@ export const kbService = {
 
         const message = await MiniMaxClient.messages.create({
           model: "MiniMax-M2.7",
-          max_tokens: 512,
+          max_tokens: 256,
           system:
-            "You are a knowledge base matching assistant. Given a user's question and a knowledge base in Chinese, determine if the KB contains a relevant answer. " +
-            "Respond with ONLY a valid JSON object, nothing else:\n" +
-            '{"found": true, "answer": "the KB answer", "resolved": true} if found, or {"found": false} if not.',
+            "You are a customer support assistant. Based on the knowledge base, answer the user's question in Chinese. " +
+            "If the KB has relevant info, use it. " +
+            "First line: YES if KB has answer, NO if not. " +
+            "Second line: Your answer (if YES) or brief explanation why not (if NO).",
           messages: [
             {
               role: "user",
@@ -66,9 +67,18 @@ export const kbService = {
           continue
         }
 
-        const result = JSON.parse(text) as KBMatchResult
-        console.log(`[kb] Match result: found=${result.found}, resolved=${result.resolved}`)
-        return result
+        // Parse: first line is YES/NO, rest is answer
+        const lines = text.split("\n").map((l) => l.trim()).filter(Boolean)
+        const firstLine = lines[0]?.toUpperCase() || ""
+        const answer = lines.slice(1).join("\n").trim()
+
+        if (firstLine.startsWith("YES") && answer) {
+          console.log(`[kb] Match found: ${answer.substring(0, 50)}...`)
+          return { found: true, answer, resolved: true }
+        } else {
+          console.log(`[kb] No match found`)
+          return { found: false }
+        }
       } catch (e) {
         console.error(`[kb] Attempt ${attempt} error:`, e)
         if (attempt < 3) {
