@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk"
 import { readFileSync } from "fs"
-import { join } from "path"
+import { join, dirname } from "path"
+import { fileURLToPath } from "url"
 
 const MiniMaxClient = new Anthropic({
   apiKey: process.env.MINIMAX_API_KEY,
@@ -17,7 +18,9 @@ let knowledgeBaseContent: string | null = null
 
 function getKnowledgeBase(): string {
   if (!knowledgeBaseContent) {
-    const kbPath = join(process.cwd(), "knowledge-base.md")
+    // Load from project root (parent of backend/)
+    const __dirname = dirname(fileURLToPath(import.meta.url))
+    const kbPath = join(__dirname, "..", "..", "..", "knowledge-base.md")
     knowledgeBaseContent = readFileSync(kbPath, "utf-8")
   }
   return knowledgeBaseContent
@@ -36,7 +39,7 @@ export const kbService = {
 
     const message = await MiniMaxClient.messages.create({
       model: "MiniMax-M2.7",
-      max_tokens: 256,
+      max_tokens: 2048,
       system:
         "You are a knowledge base matching assistant. Given a user's question and a knowledge base, determine if the knowledge base contains a relevant answer. " +
         "Respond with ONLY a JSON object, no other text:\n" +
