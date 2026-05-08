@@ -59,7 +59,11 @@ export const kbService = {
           ],
         })
 
-        const text = message.content[0]?.type === "text" ? message.content[0].text.trim() : ""
+        console.log(`[kb] Raw API response:`, JSON.stringify(message))
+
+        // Find the text content (skip thinking)
+        const textContent = message.content.find((c) => c.type === "text")
+        const text = textContent?.type === "text" ? textContent.text.trim() : ""
         console.log(`[kb] AI response: ${text}`)
 
         if (!text) {
