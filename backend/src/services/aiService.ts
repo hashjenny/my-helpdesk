@@ -67,13 +67,13 @@ ${responseList ? `回复记录:\n${responseList}` : ""}
     const firstContent = message.content.find(c => c.type === "text")
     const result = firstContent?.type === "text" ? firstContent.text.trim().toUpperCase() : ""
 
-    // Handle partial matches (e.g., "REF" -> "REFUND", "TECH" -> "TECHNICAL")
+    // Handle partial matches (e.g., "REFUND" -> "REFUND", "REF" -> "REFUND", "GENER" -> "GENERAL", "TECH" -> "TECHNICAL")
     let category: "GENERAL" | "TECHNICAL" | "REFUND" = "GENERAL"
-    if (result.includes("REFUND") || result === "REF") {
+    if (result.includes("REF")) {
       category = "REFUND"
-    } else if (result.includes("TECHNICAL") || result === "TECH") {
+    } else if (result.includes("TECH")) {
       category = "TECHNICAL"
-    } else if (result.includes("GENERAL")) {
+    } else if (result.includes("GEN")) {
       category = "GENERAL"
     } else {
       throw new Error(`Invalid category from AI: ${result}`)
