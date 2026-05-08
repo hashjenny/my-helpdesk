@@ -2,6 +2,7 @@ import { Resend } from "resend"
 import { prisma } from "../lib/prisma.js"
 import { ticketService } from "./ticketService.js"
 import { getQueue } from "../lib/queue.js"
+import { kbService } from "./kbService.js"
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -69,6 +70,18 @@ export const emailService = {
       supportEmail,
     })
 
+    // Check KB for matching answer
+    const kbResult = await kbService.matchTicket(subject, body)
+    if (kbResult.found && kbResult.answer) {
+      // KB has an answer - add response and optionally resolve
+      await ticketService.addResponse(ticket.id, kbResult.answer)
+      if (kbResult.resolved) {
+        await ticketService.update(ticket.id, { status: "RESOLVED" })
+      }
+      return { ticketId: ticket.id, isReply: false }
+    }
+
+    // No KB match - enqueue for AI classification and manual handling
     const queue = getQueue()
     await queue.send("classify-ticket", { ticketId: ticket.id, subject, body }, { retryBackoff: true })
 
