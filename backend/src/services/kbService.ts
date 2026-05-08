@@ -41,17 +41,15 @@ export const kbService = {
 
     const message = await MiniMaxClient.messages.create({
       model: "MiniMax-M2.7",
-      max_tokens: 2048,
+      max_tokens: 512,
       system:
-        "You are a knowledge base matching assistant. Given a user's question and a knowledge base, determine if the knowledge base contains a relevant answer. " +
-        "Respond with ONLY a JSON object, no other text:\n" +
-        '{"found": true/false, "answer": "the relevant answer from KB if found", "resolved": true/false}\n' +
-        '"resolved" is true only if the KB answer fully solves the problem (e.g., steps to fix, process to follow).\n' +
-        "If the KB does not contain a relevant answer, respond: {\"found\": false}",
+        "You are a knowledge base matching assistant. Given a user's question and a knowledge base in Chinese, determine if the KB contains a relevant answer. " +
+        "Respond with ONLY a valid JSON object, nothing else:\n" +
+        '{"found": true, "answer": "the KB answer", "resolved": true} if found, or {"found": false} if not.',
       messages: [
         {
           role: "user",
-          content: `Knowledge Base:\n${kb}\n\n---\n\nUser Question:\nSubject: ${subject}\nContent: ${body}`,
+          content: `Knowledge Base:\n${kb}\n\nUser Question:\nSubject: ${subject}\nContent: ${body}`,
         },
       ],
     })
@@ -60,6 +58,11 @@ export const kbService = {
 
     console.log(`[kb] Match attempt for: ${subject}`)
     console.log(`[kb] AI response: ${text}`)
+
+    if (!text) {
+      console.error(`[kb] Empty AI response`)
+      return { found: false }
+    }
 
     try {
       const result = JSON.parse(text) as KBMatchResult

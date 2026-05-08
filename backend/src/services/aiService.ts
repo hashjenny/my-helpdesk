@@ -66,11 +66,19 @@ ${responseList ? `回复记录:\n${responseList}` : ""}
 
     const firstContent = message.content.find(c => c.type === "text")
     const result = firstContent?.type === "text" ? firstContent.text.trim().toUpperCase() : ""
-    const validCategories = ["GENERAL", "TECHNICAL", "REFUND"]
-    if (!validCategories.includes(result)) {
+
+    // Handle partial matches (e.g., "REF" -> "REFUND", "TECH" -> "TECHNICAL")
+    let category: "GENERAL" | "TECHNICAL" | "REFUND" = "GENERAL"
+    if (result.includes("REFUND") || result === "REF") {
+      category = "REFUND"
+    } else if (result.includes("TECHNICAL") || result === "TECH") {
+      category = "TECHNICAL"
+    } else if (result.includes("GENERAL")) {
+      category = "GENERAL"
+    } else {
       throw new Error(`Invalid category from AI: ${result}`)
     }
-    return { category: result as "GENERAL" | "TECHNICAL" | "REFUND" }
+    return { category }
   },
 
   async suggestReplies(ticket: {
