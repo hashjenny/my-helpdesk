@@ -5,6 +5,33 @@ const router = Router()
 
 // POST /api/webhooks/email - Resend inbound email webhook
 // This route should be protected with a webhook secret in production
+// POST /api/webhooks/ticket - Manual ticket creation webhook (for testing)
+// Simulates an inbound email to create a ticket with AI classification
+router.post("/ticket", async (req, res) => {
+  try {
+    const { from, subject, text } = req.body
+
+    if (!from || !subject || !text) {
+      res.status(400).json({ error: "Missing required fields: from, subject, text" })
+      return
+    }
+
+    const result = await emailService.processInboundEmail({
+      from,
+      to: process.env.SUPPORT_EMAIL || "support@example.com",
+      subject,
+      text,
+    })
+
+    res.status(201).json({ ticketId: result.ticketId })
+  } catch (_error) {
+    console.error("Ticket webhook error:", _error)
+    res.status(500).json({ error: "Failed to create ticket" })
+  }
+})
+
+// POST /api/webhooks/email - Resend inbound email webhook
+// This route should be protected with a webhook secret in production
 router.post("/email", async (req, res) => {
   try {
     // In production, verify webhook signature:
