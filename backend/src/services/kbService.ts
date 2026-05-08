@@ -21,7 +21,9 @@ function getKnowledgeBase(): string {
     // Load from project root (parent of backend/)
     const __dirname = dirname(fileURLToPath(import.meta.url))
     const kbPath = join(__dirname, "..", "..", "..", "knowledge-base.md")
+    console.log(`[kb] Loading KB from: ${kbPath}`)
     knowledgeBaseContent = readFileSync(kbPath, "utf-8")
+    console.log(`[kb] KB loaded, length: ${knowledgeBaseContent.length}`)
   }
   return knowledgeBaseContent
 }
@@ -56,9 +58,15 @@ export const kbService = {
 
     const text = message.content[0]?.type === "text" ? message.content[0].text.trim() : ""
 
+    console.log(`[kb] Match attempt for: ${subject}`)
+    console.log(`[kb] AI response: ${text}`)
+
     try {
-      return JSON.parse(text) as KBMatchResult
-    } catch {
+      const result = JSON.parse(text) as KBMatchResult
+      console.log(`[kb] Match result: found=${result.found}, resolved=${result.resolved}`)
+      return result
+    } catch (e) {
+      console.error(`[kb] JSON parse error:`, e)
       return { found: false }
     }
   },
