@@ -57,28 +57,40 @@ ${responseList ? `回复记录:\n${responseList}` : ""}
   },
 
   async classifyTicket(subject: string, body: string): Promise<{ category: "GENERAL" | "TECHNICAL" | "REFUND" }> {
-    const message = await MiniMaxClient.messages.create({
-      model: "MiniMax-M2.7",
-      max_tokens: 64,
-      system: "你是一个工单分类助手。根据工单的主题和内容,判断它属于哪个类别。选项:GENERAL(一般咨询),TECHNICAL(技术问题),REFUND(退款/财务相关)。只回复一个词:GENERAL、TECHNICAL 或 REFUND,不要其他内容。",
-      messages: [{ role: "user", content: `主题:${subject}\n内容:${body}` }],
-    })
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      const message = await MiniMaxClient.messages.create({
+        model: "MiniMax-M2.7",
+        max_tokens: 64,
+        system: "你是一个工单分类助手。根据工单的主题和内容,判断它属于哪个类别。选项:GENERAL(一般咨询),TECHNICAL(技术问题),REFUND(退款/财务相关)。只回复一个词:GENERAL、TECHNICAL 或 REFUND,不要其他内容。",
+        messages: [{ role: "user", content: `主题:${subject}\n内容:${body}` }],
+      })
 
-    const firstContent = message.content.find(c => c.type === "text")
-    const result = firstContent?.type === "text" ? firstContent.text.trim().toUpperCase() : ""
+      const textContent = message.content.find(c => c.type === "text")
+      const result = textContent?.type === "text" ? textContent.text.trim().toUpperCase() : ""
 
-    // Handle partial matches (e.g., "REFUND" -> "REFUND", "REF" -> "REFUND", "GENER" -> "GENERAL", "TECH" -> "TECHNICAL")
-    let category: "GENERAL" | "TECHNICAL" | "REFUND" = "GENERAL"
-    if (result.includes("REF")) {
-      category = "REFUND"
-    } else if (result.includes("TECH")) {
-      category = "TECHNICAL"
-    } else if (result.includes("GEN")) {
-      category = "GENERAL"
-    } else {
-      throw new Error(`Invalid category from AI: ${result}`)
+      console.log(`[classifier] Attempt ${attempt}: raw result = "${result}", textContent exists = ${!!textContent}`)
+
+      if ((!result || !textContent) && attempt < 3) {
+        console.log(`[classifier] Empty result, retrying...`)
+        await new Promise(r => setTimeout(r, 1000))
+        continue
+      }
+
+      // Handle partial matches (e.g., "REFUND" -> "REFUND", "REF" -> "REFUND", "GENER" -> "GENERAL", "TECH" -> "TECHNICAL")
+      let category: "GENERAL" | "TECHNICAL" | "REFUND" = "GENERAL"
+      if (result.includes("REF")) {
+        category = "REFUND"
+      } else if (result.includes("TECH")) {
+        category = "TECHNICAL"
+      } else if (result.includes("GEN")) {
+        category = "GENERAL"
+      } else {
+        throw new Error(`Invalid category from AI: ${result}`)
+      }
+      return { category }
     }
-    return { category }
+
+    throw new Error(`Failed to classify after 3 attempts`)
   },
 
   async suggestReplies(ticket: {
