@@ -39,38 +39,45 @@ export const kbService = {
   ): Promise<KBMatchResult> {
     const kb = getKnowledgeBase()
 
-    const message = await MiniMaxClient.messages.create({
-      model: "MiniMax-M2.7",
-      max_tokens: 512,
-      system:
-        "You are a knowledge base matching assistant. Given a user's question and a knowledge base in Chinese, determine if the KB contains a relevant answer. " +
-        "Respond with ONLY a valid JSON object, nothing else:\n" +
-        '{"found": true, "answer": "the KB answer", "resolved": true} if found, or {"found": false} if not.',
-      messages: [
-        {
-          role: "user",
-          content: `Knowledge Base:\n${kb}\n\nUser Question:\nSubject: ${subject}\nContent: ${body}`,
-        },
-      ],
-    })
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        console.log(`[kb] Match attempt ${attempt}/3 for: ${subject}`)
 
-    const text = message.content[0]?.type === "text" ? message.content[0].text.trim() : ""
+        const message = await MiniMaxClient.messages.create({
+          model: "MiniMax-M2.7",
+          max_tokens: 512,
+          system:
+            "You are a knowledge base matching assistant. Given a user's question and a knowledge base in Chinese, determine if the KB contains a relevant answer. " +
+            "Respond with ONLY a valid JSON object, nothing else:\n" +
+            '{"found": true, "answer": "the KB answer", "resolved": true} if found, or {"found": false} if not.',
+          messages: [
+            {
+              role: "user",
+              content: `Knowledge Base:\n${kb}\n\nUser Question:\nSubject: ${subject}\nContent: ${body}`,
+            },
+          ],
+        })
 
-    console.log(`[kb] Match attempt for: ${subject}`)
-    console.log(`[kb] AI response: ${text}`)
+        const text = message.content[0]?.type === "text" ? message.content[0].text.trim() : ""
+        console.log(`[kb] AI response: ${text}`)
 
-    if (!text) {
-      console.error(`[kb] Empty AI response`)
-      return { found: false }
+        if (!text) {
+          console.error(`[kb] Empty AI response on attempt ${attempt}`)
+          continue
+        }
+
+        const result = JSON.parse(text) as KBMatchResult
+        console.log(`[kb] Match result: found=${result.found}, resolved=${result.resolved}`)
+        return result
+      } catch (e) {
+        console.error(`[kb] Attempt ${attempt} error:`, e)
+        if (attempt < 3) {
+          await new Promise((r) => setTimeout(r, 1000))
+        }
+      }
     }
 
-    try {
-      const result = JSON.parse(text) as KBMatchResult
-      console.log(`[kb] Match result: found=${result.found}, resolved=${result.resolved}`)
-      return result
-    } catch (e) {
-      console.error(`[kb] JSON parse error:`, e)
-      return { found: false }
-    }
+    console.error(`[kb] All 3 attempts failed, returning no match`)
+    return { found: false }
   },
 }
