@@ -4,6 +4,8 @@ import cors from "cors"
 import rateLimit from "express-rate-limit"
 import { toNodeHandler } from "better-auth/node"
 import * as Sentry from "@sentry/node"
+import path from "path"
+import { fileURLToPath } from "url"
 import { auth } from "./auth.js"
 import usersRouter from "./routes/users.js"
 import ticketsRouter from "./routes/tickets.js"
@@ -11,6 +13,8 @@ import emailRouter from "./routes/email.js"
 import dashboardRouter from "./routes/dashboard.js"
 import { startClassifierWorker } from "./worker/classifier.js"
 import { logger } from "./lib/logger.js"
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const DSN = "https://68033a0e75cd239735c2814c55beaacd@o4511357945053184.ingest.us.sentry.io/4511358000037888"
 const isProduction = process.env.NODE_ENV === "production"
@@ -84,6 +88,13 @@ app.get("/api/test", (_req, res) => res.json({ message: "test" }))
 
 // Health check
 app.get("/api/health", (_req, res) => res.json({ status: "ok" }))
+
+// Serve static frontend files in production
+if (isProduction) {
+  const publicPath = path.join(__dirname, "public")
+  app.use(express.static(publicPath))
+  app.get("*", (_req, res) => res.sendFile(path.join(publicPath, "index.html")))
+}
 
 // Error handler - don't leak internal details
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
