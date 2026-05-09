@@ -4,6 +4,7 @@ import { queryClient } from './lib/query-client'
 import { AuthProvider } from './context/AuthContext'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { UserBadge } from './components/UserBadge'
+import { ErrorBoundary } from './components/ErrorBoundary'
 import { Login } from './pages/Login'
 import { Register } from './pages/Register'
 import { Dashboard } from './pages/Dashboard'
@@ -15,7 +16,8 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <BrowserRouter>
+        <ErrorBoundary>
+          <BrowserRouter>
         <header className="sticky top-0 z-50 w-full border-b border-amber-500/30 bg-[oklch(0.06_0_0)] backdrop-blur-md">
           <div className="flex h-14 items-center justify-between px-6">
             <div className="flex items-center gap-6">
@@ -94,9 +96,10 @@ function App() {
             </Routes>
           </div>
         </main>
-      </BrowserRouter>
-      </AuthProvider>
-    </QueryClientProvider>
+        </BrowserRouter>
+        </ErrorBoundary>
+        </AuthProvider>
+      </QueryClientProvider>
   )
 }
 

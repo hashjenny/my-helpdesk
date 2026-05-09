@@ -146,14 +146,14 @@ export function MyForm() {
 
 ### Completed Phases
 
-**Phase 1: Project Setup**
+**Phase 1: Project Setup** (completed)
 
 - Frontend scaffold with Vite + React + TypeScript + Tailwind + React Router
 - Backend scaffold with Express + TypeScript + Node.js
 - Prisma initialized with PostgreSQL
 - **Obsidian Terminal** theme (dark mode, amber accent, JetBrains Mono font)
 
-**Phase 2: Database Schema & Models**
+**Phase 2: Database Schema & Models** (completed)
 
 - User model (ADMIN, AGENT roles)
 - Ticket model (OPEN, RESOLVED, CLOSED statuses; GENERAL, TECHNICAL, REFUND categories)
@@ -161,7 +161,7 @@ export function MyForm() {
 - Session model (for Better Auth)
 - Migrations applied to PostgreSQL
 
-**Phase 3: Authentication**
+**Phase 3: Authentication** (completed)
 
 - Better Auth integration with Express
 - User registration and login (frontend + backend)
