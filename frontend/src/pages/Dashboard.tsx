@@ -11,6 +11,21 @@ const statusLabels: Record<TicketStatus, string> = {
   CLOSED: "已关闭",
 }
 
+function TerminalCard({ label, value }: { label: string; value: number }) {
+  return (
+    <Card className="border-amber-500/20 bg-[oklch(0.11_0_0)] hover:border-amber-500/40 transition-all duration-300 group">
+      <CardContent className="pt-4">
+        <p className="text-amber-500/60 font-mono text-xs uppercase tracking-wider mb-1">
+          {label}
+        </p>
+        <p className="text-3xl font-bold font-mono text-amber-400 group-hover:text-amber-300 transition-colors">
+          {value}
+        </p>
+        <div className="mt-2 h-px bg-gradient-to-r from-amber-500/50 to-transparent" />
+      </CardContent>
+    </Card>
+  )
+}
 
 export function Dashboard() {
   const { session } = useAuth()
@@ -31,52 +46,76 @@ export function Dashboard() {
   })
 
   const statCards = [
-    { label: "总工单", value: stats?.total ?? 0, color: "bg-blue-50 border-blue-200" },
-    { label: "待处理", value: stats?.byStatus.OPEN ?? 0, color: "bg-yellow-50 border-yellow-200" },
-    { label: "已解决", value: stats?.byStatus.RESOLVED ?? 0, color: "bg-green-50 border-green-200" },
-    { label: "已关闭", value: stats?.byStatus.CLOSED ?? 0, color: "bg-gray-50 border-gray-200" },
+    { label: "总工单", value: stats?.total ?? 0 },
+    { label: "待处理", value: stats?.byStatus.OPEN ?? 0 },
+    { label: "已解决", value: stats?.byStatus.RESOLVED ?? 0 },
+    { label: "已关闭", value: stats?.byStatus.CLOSED ?? 0 },
   ]
 
   const categoryCards = [
-    { label: "一般咨询", key: "GENERAL" as const, color: "bg-blue-50 border-blue-200" },
-    { label: "技术问题", key: "TECHNICAL" as const, color: "bg-orange-50 border-orange-200" },
-    { label: "退款", key: "REFUND" as const, color: "bg-red-50 border-red-200" },
+    { label: "一般咨询", key: "GENERAL" as const },
+    { label: "技术问题", key: "TECHNICAL" as const },
+    { label: "退款", key: "REFUND" as const },
   ]
 
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold">Dashboard</h1>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center gap-2 text-sm font-mono">
+        <span className="text-amber-500">$</span>
+        <span className="text-amber-400/80">dashboard</span>
+        <span className="text-amber-500/40">--stats</span>
+      </div>
 
       {/* Status cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {statCards.map((card) => (
-          <Card key={card.label} className={card.color}>
-            <CardContent className="pt-4">
-              <p className="text-sm text-muted-foreground">{card.label}</p>
-              {statsLoading ? (
-                <div className="h-8 bg-black/10 animate-pulse rounded mt-1" />
-              ) : statsError ? (
-                <p className="text-sm text-destructive mt-1">加载失败</p>
-              ) : (
-                <p className="text-2xl font-bold mt-1">{card.value}</p>
-              )}
-            </CardContent>
-          </Card>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {statCards.map((card, i) => (
+          <div
+            key={card.label}
+            className="animate-fade-in"
+            style={{ animationDelay: `${i * 75}ms` }}
+          >
+            {statsLoading ? (
+              <Card className="border-amber-500/20 bg-[oklch(0.11_0_0)]">
+                <CardContent className="pt-4">
+                  <p className="text-amber-500/60 font-mono text-xs uppercase tracking-wider mb-1">
+                    {card.label}
+                  </p>
+                  <div className="h-8 bg-amber-500/10 animate-pulse rounded" />
+                </CardContent>
+              </Card>
+            ) : statsError ? (
+              <Card className="border-red-500/30 bg-[oklch(0.11_0_0)]">
+                <CardContent className="pt-4">
+                  <p className="text-red-400 text-sm">加载失败</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <TerminalCard label={card.label} value={card.value} />
+            )}
+          </div>
         ))}
       </div>
 
       {/* Category breakdown */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 gap-3">
         {categoryCards.map((card) => (
-          <Card key={card.key} className={card.color}>
-            <CardContent className="pt-4">
-              <p className="text-sm text-muted-foreground">{card.label}</p>
+          <Card
+            key={card.key}
+            className="border-amber-500/10 bg-[oklch(0.08_0_0)]"
+          >
+            <CardContent className="pt-3">
+              <p className="text-amber-500/40 font-mono text-xs uppercase tracking-wider">
+                {card.label}
+              </p>
               {statsLoading ? (
-                <span className="h-6 bg-black/10 animate-pulse rounded mt-1 inline-block w-8" />
+                <div className="h-6 w-8 bg-amber-500/10 animate-pulse rounded mt-1" />
               ) : statsError ? (
-                <p className="text-sm text-destructive mt-1">-</p>
+                <p className="text-red-400 text-sm">-</p>
               ) : (
-                <p className="text-2xl font-bold mt-1">{stats?.byCategory[card.key] ?? 0}</p>
+                <p className="text-xl font-bold font-mono text-amber-400/70 mt-1">
+                  {stats?.byCategory[card.key] ?? 0}
+                </p>
               )}
             </CardContent>
           </Card>
@@ -84,38 +123,61 @@ export function Dashboard() {
       </div>
 
       {/* Recent tickets */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">最近工单</CardTitle>
+      <Card className="border-amber-500/20 bg-[oklch(0.11_0_0)]">
+        <CardHeader className="pb-3">
+          <div className="flex items-center gap-2">
+            <span className="text-amber-500">{'//'}</span>
+            <CardTitle className="text-sm font-mono text-amber-400/80 uppercase tracking-wider">
+              最近工单
+            </CardTitle>
+          </div>
         </CardHeader>
         <CardContent>
           {recentLoading ? (
-            <p className="text-sm text-muted-foreground">加载中...</p>
-          ) : recentError ? (
-            <p className="text-sm text-destructive">加载失败</p>
-          ) : recent?.tickets.length === 0 ? (
-            <p className="text-sm text-muted-foreground">暂无工单</p>
-          ) : (
             <div className="space-y-2">
-              {recent?.tickets.map((ticket) => (
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-12 bg-amber-500/5 animate-pulse rounded" />
+              ))}
+            </div>
+          ) : recentError ? (
+            <p className="text-red-400 font-mono text-sm">加载失败</p>
+          ) : recent?.tickets.length === 0 ? (
+            <p className="text-amber-500/40 font-mono text-sm italic">暂无工单</p>
+          ) : (
+            <div className="space-y-1">
+              {recent?.tickets.map((ticket, idx) => (
                 <Link
                   key={ticket.id}
                   to={`/tickets/${ticket.id}`}
-                  className="flex items-center justify-between p-3 rounded-md border hover:bg-muted/50 transition-colors"
+                  className="flex items-center justify-between p-3 rounded border border-transparent hover:border-amber-500/30 hover:bg-amber-500/5 transition-all group"
                 >
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{ticket.subject}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {ticket.supportEmail ?? "无邮箱"} · {new Date(ticket.createdAt).toLocaleString("zh-CN")}
-                    </p>
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <span className="text-amber-500/40 font-mono text-xs">
+                      {String(idx + 1).padStart(2, "0")}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-amber-400/90 font-mono text-sm truncate group-hover:text-amber-400 transition-colors">
+                        {ticket.subject}
+                      </p>
+                      <p className="text-amber-500/40 font-mono text-xs truncate">
+                        {ticket.supportEmail ?? "无邮箱"} · {new Date(ticket.createdAt).toLocaleString("zh-CN")}
+                      </p>
+                    </div>
                   </div>
                   <div className="flex items-center gap-2 ml-4">
-                    <span className={`text-xs px-2 py-0.5 rounded ${
-                      ticket.status === "OPEN" ? "bg-yellow-100 text-yellow-800" :
-                      ticket.status === "RESOLVED" ? "bg-green-100 text-green-800" :
-                      "bg-gray-100 text-gray-800"
-                    }`}>
+                    <span
+                      className={`text-xs px-2 py-0.5 rounded font-mono border ${
+                        ticket.status === "OPEN"
+                          ? "border-yellow-500/50 text-yellow-400 bg-yellow-500/10"
+                          : ticket.status === "RESOLVED"
+                          ? "border-green-500/50 text-green-400 bg-green-500/10"
+                          : "border-gray-500/50 text-gray-400 bg-gray-500/10"
+                      }`}
+                    >
                       {statusLabels[ticket.status as TicketStatus]}
+                    </span>
+                    <span className="text-amber-500/30 group-hover:text-amber-500/60 transition-colors">
+                      →
                     </span>
                   </div>
                 </Link>

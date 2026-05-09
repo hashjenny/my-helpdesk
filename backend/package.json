@@ -27,6 +27,7 @@
   "dependencies": {
     "@helpdesk/shared": "workspace:*",
     "@prisma/client": "^5.22.0",
+    "@sentry/node": "^10.52.0",
     "bcrypt": "^6.0.0",
     "better-auth": "^1.6.4",
     "cors": "^2.8.6",

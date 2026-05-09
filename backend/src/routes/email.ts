@@ -1,5 +1,6 @@
 import { Router } from "express"
 import { emailService } from "../services/email.js"
+import { logger } from "../lib/logger.js"
 
 const router = Router()
 
@@ -25,7 +26,7 @@ router.post("/ticket", async (req, res) => {
 
     res.status(201).json({ ticketId: result.ticketId })
   } catch (_error) {
-    console.error("Ticket webhook error:", _error)
+    logger.error("Ticket webhook error:", _error)
     res.status(500).json({ error: "Failed to create ticket" })
   }
 })
@@ -59,7 +60,7 @@ router.post("/email", async (req, res) => {
     // result can be { ticketId, responseId, isReply } for replies or { ticketId, isReply } for new tickets
     res.status(201).json({ ticketId: result.ticketId })
   } catch (_error) {
-    console.error("Email webhook error:", _error)
+    logger.error("Email webhook error:", _error)
     res.status(500).json({ error: "Failed to process email" })
   }
 })

@@ -3,12 +3,24 @@ import express from "express"
 import cors from "cors"
 import rateLimit from "express-rate-limit"
 import { toNodeHandler } from "better-auth/node"
+import * as Sentry from "@sentry/node"
 import { auth } from "./auth.js"
 import usersRouter from "./routes/users.js"
 import ticketsRouter from "./routes/tickets.js"
 import emailRouter from "./routes/email.js"
 import dashboardRouter from "./routes/dashboard.js"
 import { startClassifierWorker } from "./worker/classifier.js"
+import { logger } from "./lib/logger.js"
+
+const DSN = "https://68033a0e75cd239735c2814c55beaacd@o4511357945053184.ingest.us.sentry.io/4511358000037888"
+const isProduction = process.env.NODE_ENV === "production"
+
+if (isProduction) {
+  Sentry.init({
+    dsn: DSN,
+    tracesSampleRate: 1.0,
+  })
+}
 
 const app = express()
 
@@ -75,13 +87,13 @@ app.get("/api/health", (_req, res) => res.json({ status: "ok" }))
 
 // Error handler - don't leak internal details
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-  console.error("Error:", err)
+  logger.error("Error:", err)
   res.status(500).json({ error: "An internal error occurred" })
 })
 
 const PORT = Number(process.env.PORT) || 3001
 
 app.listen(PORT, async () => {
-  console.log(`Server running on port ${PORT}`)
+  logger.info(`Server running on port ${PORT}`)
   await startClassifierWorker()
 })

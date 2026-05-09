@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk"
+import { logger } from "../lib/logger.js"
 
 const MiniMaxClient = new Anthropic({
   apiKey: process.env.MINIMAX_API_KEY,
@@ -68,10 +69,10 @@ ${responseList ? `回复记录:\n${responseList}` : ""}
       const textContent = message.content.find(c => c.type === "text")
       const result = textContent?.type === "text" ? textContent.text.trim().toUpperCase() : ""
 
-      console.log(`[classifier] Attempt ${attempt}: raw result = "${result}", textContent exists = ${!!textContent}`)
+      logger.debug(`[classifier] Attempt ${attempt}: raw result = "${result}", textContent exists = ${!!textContent}`)
 
       if ((!result || !textContent) && attempt < 3) {
-        console.log(`[classifier] Empty result, retrying...`)
+        logger.debug(`[classifier] Empty result, retrying...`)
         await new Promise(r => setTimeout(r, 1000))
         continue
       }

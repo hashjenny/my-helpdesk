@@ -4,6 +4,7 @@ import { ticketService } from "../services/ticketService.js"
 import { aiService } from "../services/aiService.js"
 import { prisma } from "../lib/prisma.js"
 import { sendEmail } from "../lib/resend.js"
+import { logger } from "../lib/logger.js"
 import {
   createTicketSchema,
   updateTicketSchema,
@@ -116,7 +117,7 @@ router.post("/", requireAuth, async (req, res) => {
           )
         )
       } catch (err) {
-        console.error(`[Email] Failed to send agent notifications for ticket ${ticket.id}:`, err)
+        logger.error(`[Email] Failed to send agent notifications for ticket ${ticket.id}:`, err)
       }
     })()
   } catch (_error) {
@@ -216,7 +217,7 @@ router.post("/:id/polish", requireAuth, async (req, res) => {
     const result = await aiService.polishText(body)
     res.json(result)
   } catch (error) {
-    console.error("Polish text error:", error)
+    logger.error("Polish text error:", error)
     res.status(500).json({ error: "Failed to polish text" })
   }
 })
@@ -247,7 +248,7 @@ router.post("/:id/summarize", requireAuth, async (req, res) => {
     res.json(result)
   } catch (error) {
     const err = error as { message?: string }
-    console.error("Summarize error:", err?.message || error)
+    logger.error("Summarize error:", err?.message || error)
     res.status(500).json({ error: "Failed to summarize ticket" })
   }
 })
@@ -269,7 +270,7 @@ router.post("/:id/classify", requireAuth, async (req, res) => {
     res.json(result)
   } catch (error) {
     const err = error as { message?: string }
-    console.error("Classify error:", err?.message || error)
+    logger.error("Classify error:", err?.message || error)
     res.status(500).json({ error: "Failed to classify ticket" })
   }
 })
@@ -299,7 +300,7 @@ router.get("/:id/suggested-reply", requireAuth, async (req, res) => {
     res.json(result)
   } catch (error) {
     const err = error as { message?: string }
-    console.error("Suggest reply error:", err?.message || error)
+    logger.error("Suggest reply error:", err?.message || error)
     res.status(500).json({ error: "Failed to generate suggested replies" })
   }
 })

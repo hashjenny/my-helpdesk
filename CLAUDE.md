@@ -151,7 +151,7 @@ export function MyForm() {
 - Frontend scaffold with Vite + React + TypeScript + Tailwind + React Router
 - Backend scaffold with Express + TypeScript + Node.js
 - Prisma initialized with PostgreSQL
-- StatusCheck component for health check
+- **Obsidian Terminal** theme (dark mode, amber accent, JetBrains Mono font)
 
 **Phase 2: Database Schema & Models**
 
@@ -249,6 +249,43 @@ export function MyForm() {
 ### Implementation Plan
 
 See `plan.md` for full feature breakdown across 8 phases.
+
+## Design System: Obsidian Terminal
+
+The frontend uses a custom **Obsidian Terminal** dark theme:
+
+### Color Palette
+- Background: `oklch(0.08 0 0)` (near black)
+- Foreground: `oklch(0.92 0.01 85)` (amber white)
+- Primary accent: `oklch(0.75 0.15 75)` (terminal amber)
+- Border: `oklch(0.22 0.03 75)` (subtle amber border)
+- Destructive: `oklch(0.65 0.2 25)` (terminal red)
+
+### Typography
+- Font: **JetBrains Mono** (Google Fonts) for all text
+- Fallback: `ui-monospace, monospace`
+
+### Key Style Classes
+- Cards: `border-amber-500/20 bg-[oklch(0.11_0_0)]`
+- Inputs: `border-amber-500/30 bg-[oklch(0.08_0_0)] text-amber-400 font-mono`
+- Buttons: `border-amber-500/50 bg-amber-500/10 text-amber-400 font-mono`
+- Status badges: `border-{color}-500/50 text-{color}-400 bg-{color}-500/10`
+
+### Logging
+
+The project uses a unified logging system with environment-aware behavior:
+
+**Frontend:** `frontend/src/lib/logger.ts`
+**Backend:** `backend/src/lib/logger.ts`
+
+| Environment | Log Output | Sentry |
+|------------|------------|--------|
+| Development | `console.log/info/warn/debug` | Not sent |
+| Production | `console.log/info/warn/debug` | Errors/exceptions uploaded |
+
+Sentry DSNs:
+- Frontend: `https://5073e905956759a558b80b4e88be6a82@o4511357945053184.ingest.us.sentry.io/4511357989224449`
+- Backend: `https://68033a0e75cd239735c2814c55beaacd@o4511357945053184.ingest.us.sentry.io/4511358000037888`
 
 ## Agents
 

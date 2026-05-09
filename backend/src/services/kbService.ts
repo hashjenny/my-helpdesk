@@ -2,6 +2,7 @@ import Anthropic from "@anthropic-ai/sdk"
 import { readFileSync } from "fs"
 import { join, dirname } from "path"
 import { fileURLToPath } from "url"
+import { logger } from "../lib/logger.js"
 
 const MiniMaxClient = new Anthropic({
   apiKey: process.env.MINIMAX_API_KEY,
@@ -21,9 +22,9 @@ function getKnowledgeBase(): string {
     // Load from project root (parent of backend/)
     const __dirname = dirname(fileURLToPath(import.meta.url))
     const kbPath = join(__dirname, "..", "..", "..", "knowledge-base.md")
-    console.log(`[kb] Loading KB from: ${kbPath}`)
+    logger.info(`[kb] Loading KB from: ${kbPath}`)
     knowledgeBaseContent = readFileSync(kbPath, "utf-8")
-    console.log(`[kb] KB loaded, length: ${knowledgeBaseContent.length}`)
+    logger.info(`[kb] KB loaded, length: ${knowledgeBaseContent.length}`)
   }
   return knowledgeBaseContent
 }
@@ -41,7 +42,7 @@ export const kbService = {
 
     for (let attempt = 1; attempt <= 3; attempt++) {
       try {
-        console.log(`[kb] Match attempt ${attempt}/3 for: ${subject}`)
+        logger.debug(`[kb] Match attempt ${attempt}/3 for: ${subject}`)
 
         const message = await MiniMaxClient.messages.create({
           model: "MiniMax-M2.7",
@@ -59,15 +60,15 @@ export const kbService = {
           ],
         })
 
-        console.log(`[kb] Raw API response:`, JSON.stringify(message))
+        logger.debug(`[kb] Raw API response:`, JSON.stringify(message))
 
         // Find the text content (skip thinking)
         const textContent = message.content.find((c) => c.type === "text")
         const text = textContent?.type === "text" ? textContent.text.trim() : ""
-        console.log(`[kb] AI response: ${text}`)
+        logger.debug(`[kb] AI response: ${text}`)
 
         if (!text) {
-          console.error(`[kb] Empty AI response on attempt ${attempt}`)
+          logger.warn(`[kb] Empty AI response on attempt ${attempt}`)
           continue
         }
 
@@ -77,21 +78,21 @@ export const kbService = {
         const answer = lines.slice(1).join("\n").trim()
 
         if (firstLine.startsWith("YES") && answer) {
-          console.log(`[kb] Match found: ${answer.substring(0, 50)}...`)
+          logger.info(`[kb] Match found: ${answer.substring(0, 50)}...`)
           return { found: true, answer, resolved: true }
         } else {
-          console.log(`[kb] No match found`)
+          logger.debug(`[kb] No match found`)
           return { found: false }
         }
       } catch (e) {
-        console.error(`[kb] Attempt ${attempt} error:`, e)
+        logger.error(`[kb] Attempt ${attempt} error:`, e)
         if (attempt < 3) {
           await new Promise((r) => setTimeout(r, 1000))
         }
       }
     }
 
-    console.error(`[kb] All 3 attempts failed, returning no match`)
+    logger.error(`[kb] All 3 attempts failed, returning no match`)
     return { found: false }
   },
 }

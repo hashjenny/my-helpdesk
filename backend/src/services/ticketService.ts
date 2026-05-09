@@ -1,4 +1,5 @@
 import { prisma } from "../lib/prisma.js"
+import { logger } from "../lib/logger.js"
 import type { CreateTicketInput, UpdateTicketInput } from "@helpdesk/shared"
 
 export const ticketService = {
@@ -97,7 +98,7 @@ export const ticketService = {
         await emailService.sendTicketResponseEmail(ticket, response.body)
       }
     } catch (error) {
-      console.error("Failed to send ticket response email:", error)
+      logger.error("Failed to send ticket response email:", error)
     }
 
     return response
