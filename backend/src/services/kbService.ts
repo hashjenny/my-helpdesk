@@ -1,7 +1,11 @@
+import dotenv from "dotenv"
+import path from "path"
+import { fileURLToPath } from "url"
+dotenv.config({ path: path.join(fileURLToPath(import.meta.url), "../..", ".env") })
+
 import Anthropic from "@anthropic-ai/sdk"
 import { readFileSync } from "fs"
-import { join, dirname } from "path"
-import { fileURLToPath } from "url"
+import { join } from "path"
 import { logger } from "../lib/logger.js"
 
 const MiniMaxClient = new Anthropic({
@@ -19,9 +23,8 @@ let knowledgeBaseContent: string | null = null
 
 function getKnowledgeBase(): string {
   if (!knowledgeBaseContent) {
-    // Load from project root (parent of backend/)
-    const __dirname = dirname(fileURLToPath(import.meta.url))
-    const kbPath = join(__dirname, "..", "..", "..", "knowledge-base.md")
+    const currentDir = path.dirname(fileURLToPath(import.meta.url))
+    const kbPath = join(currentDir, "..", "..", "..", "knowledge-base.md")
     logger.info(`[kb] Loading KB from: ${kbPath}`)
     knowledgeBaseContent = readFileSync(kbPath, "utf-8")
     logger.info(`[kb] KB loaded, length: ${knowledgeBaseContent.length}`)
