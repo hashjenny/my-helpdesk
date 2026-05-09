@@ -182,8 +182,6 @@ export function MyForm() {
 - **Client-side sorting** with TanStack Table (click column headers)
 - **Soft delete** (tickets have `deletedAt` field, filtered by default)
 
-### Current Phase
-
 **Phase 5: Email Integration** (completed)
 
 - Resend integration for inbound email processing
@@ -202,6 +200,10 @@ export function MyForm() {
 - `GET /api/dashboard/stats` - Ticket counts by status and category
 - `GET /api/dashboard/recent` - 10 most recent tickets
 - Dashboard page at `/` with stat cards and recent tickets list
+
+### Current Phase
+
+**Phase 8: Polish & Deployment**
 
 ### Navigation
 
@@ -255,6 +257,7 @@ See `plan.md` for full feature breakdown across 8 phases.
 The frontend uses a custom **Obsidian Terminal** dark theme:
 
 ### Color Palette
+
 - Background: `oklch(0.08 0 0)` (near black)
 - Foreground: `oklch(0.92 0.01 85)` (amber white)
 - Primary accent: `oklch(0.75 0.15 75)` (terminal amber)
@@ -262,10 +265,12 @@ The frontend uses a custom **Obsidian Terminal** dark theme:
 - Destructive: `oklch(0.65 0.2 25)` (terminal red)
 
 ### Typography
+
 - Font: **JetBrains Mono** (Google Fonts) for all text
 - Fallback: `ui-monospace, monospace`
 
 ### Key Style Classes
+
 - Cards: `border-amber-500/20 bg-[oklch(0.11_0_0)]`
 - Inputs: `border-amber-500/30 bg-[oklch(0.08_0_0)] text-amber-400 font-mono`
 - Buttons: `border-amber-500/50 bg-amber-500/10 text-amber-400 font-mono`
@@ -284,6 +289,7 @@ The project uses a unified logging system with environment-aware behavior:
 | Production | `console.log/info/warn/debug` | Errors/exceptions uploaded |
 
 Sentry DSNs:
+
 - Frontend: `https://5073e905956759a558b80b4e88be6a82@o4511357945053184.ingest.us.sentry.io/4511357989224449`
 - Backend: `https://68033a0e75cd239735c2814c55beaacd@o4511357945053184.ingest.us.sentry.io/4511358000037888`
 

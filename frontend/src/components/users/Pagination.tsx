@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button"
+import { Select } from "@/components/ui/select"
 
 interface PaginationProps {
   page: number
@@ -22,17 +23,16 @@ export function Pagination({
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-4">
-        <span className="text-sm text-muted-foreground">Total: {total} users</span>
-        <select
-          className="flex h-8 rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm"
-          value={limit}
+        <span className="text-sm font-mono text-amber-500/60">total: {total}</span>
+        <Select
+          value={String(limit)}
           onChange={(e) => onLimitChange(Number(e.target.value))}
         >
           <option value={5}>5 / page</option>
           <option value={10}>10 / page</option>
           <option value={20}>20 / page</option>
           <option value={50}>50 / page</option>
-        </select>
+        </Select>
       </div>
       <div className="flex items-center gap-2">
         <Button
@@ -40,19 +40,21 @@ export function Pagination({
           size="sm"
           onClick={() => onPageChange(Math.max(1, page - 1))}
           disabled={page <= 1 || isLoading}
+          className="font-mono"
         >
-          Previous
+          [prev]
         </Button>
-        <span className="text-sm">
-          Page {page} of {totalPages}
+        <span className="text-sm font-mono text-amber-500/60">
+          {page} / {totalPages}
         </span>
         <Button
           variant="outline"
           size="sm"
           onClick={() => onPageChange(Math.min(totalPages, page + 1))}
           disabled={page >= totalPages || isLoading}
+          className="font-mono"
         >
-          Next
+          [next]
         </Button>
       </div>
     </div>

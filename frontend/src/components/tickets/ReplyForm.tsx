@@ -37,7 +37,6 @@ export function ReplyForm({ ticketId, onSubmit, isPending, defaultValue }: Reply
     defaultValues: { body: defaultValue ?? "" },
   })
 
-  // Sync form when defaultValue changes (e.g., when clicking a suggested reply)
   useEffect(() => {
     if (defaultValue !== undefined) {
       reset({ body: defaultValue })
@@ -60,23 +59,30 @@ export function ReplyForm({ ticketId, onSubmit, isPending, defaultValue }: Reply
   }
 
   return (
-    <Card>
+    <Card className="border-amber-500/20">
       <CardHeader>
-        <CardTitle>Add Response</CardTitle>
+        <div className="flex items-center gap-2">
+          <span className="text-amber-500 font-mono">&gt;</span>
+          <CardTitle className="text-sm font-mono text-amber-400/80 uppercase tracking-wider">
+            add response
+          </CardTitle>
+        </div>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="reply">Your Response</Label>
+            <Label htmlFor="reply" className="text-amber-400/70 font-mono text-xs uppercase">
+              &gt; your response
+            </Label>
             <textarea
               id="reply"
-              className="flex min-h-24 w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm"
-              placeholder="Type your response..."
+              className="flex min-h-24 w-full rounded border border-amber-500/30 bg-[oklch(0.08_0_0)] px-3 py-2 font-mono text-sm text-amber-400 transition-all duration-200 outline-none placeholder:text-amber-500/30 focus:border-amber-500/60 focus:ring-2 focus:ring-amber-500/20 resize-none"
+              placeholder="type your response..."
               {...register("body")}
               aria-invalid={!!errors.body}
             />
             {errors.body && (
-              <p className="text-sm text-destructive">{errors.body.message}</p>
+              <p className="text-red-400 font-mono text-xs">! {errors.body.message}</p>
             )}
           </div>
           <div className="flex gap-2">
@@ -85,11 +91,12 @@ export function ReplyForm({ ticketId, onSubmit, isPending, defaultValue }: Reply
               variant="outline"
               onClick={() => currentBody && polishMutation.mutate(currentBody)}
               disabled={!currentBody?.trim() || polishMutation.isPending}
+              className="font-mono"
             >
-              {polishMutation.isPending ? "Polishing..." : "Polish with AI"}
+              {polishMutation.isPending ? "[ polishing... ]" : "[ polish with ai ]"}
             </Button>
-            <Button type="submit" disabled={isPending}>
-              {isPending ? "Sending..." : "Send Response"}
+            <Button type="submit" disabled={isPending} className="font-mono">
+              {isPending ? "[ sending... ]" : "[ send response ]"}
             </Button>
           </div>
         </form>

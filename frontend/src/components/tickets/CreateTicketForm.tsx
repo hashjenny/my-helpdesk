@@ -5,6 +5,7 @@ import { createTicketSchema } from "@helpdesk/shared"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Select } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 interface CreateTicketFormProps {
@@ -29,62 +30,82 @@ export function CreateTicketForm({ onSubmit, onCancel, isPending }: CreateTicket
   })
 
   return (
-    <Card>
+    <Card className="border-amber-500/20">
       <CardHeader>
-        <CardTitle>Create New Ticket</CardTitle>
+        <div className="flex items-center gap-2">
+          <span className="text-amber-500 font-mono">&gt;</span>
+          <CardTitle className="text-sm font-mono text-amber-400/80 uppercase tracking-wider">
+            create ticket
+          </CardTitle>
+        </div>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit((data) => onSubmit(data))} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="subject">Subject</Label>
+            <Label htmlFor="subject" className="text-amber-400/70 font-mono text-xs uppercase">
+              &gt; subject
+            </Label>
             <Input
               id="subject"
               type="text"
               placeholder="Brief description of the issue"
               {...register("subject")}
+              className="border-amber-500/30 bg-[oklch(0.08_0_0)] text-amber-400 font-mono placeholder:text-amber-500/30"
               aria-invalid={!!errors.subject}
             />
             {errors.subject && (
-              <p className="text-sm text-destructive">{errors.subject.message}</p>
+              <p className="text-red-400 font-mono text-xs">! {errors.subject.message}</p>
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="body">Description</Label>
+            <Label htmlFor="body" className="text-amber-400/70 font-mono text-xs uppercase">
+              &gt; description
+            </Label>
             <textarea
               id="body"
-              className="flex min-h-32 w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm"
+              className="flex min-h-32 w-full rounded border border-amber-500/30 bg-[oklch(0.08_0_0)] px-3 py-2 font-mono text-sm text-amber-400 transition-all duration-200 outline-none placeholder:text-amber-500/30 focus:border-amber-500/60 focus:ring-2 focus:ring-amber-500/20 resize-none"
               placeholder="Detailed description..."
               {...register("body")}
               aria-invalid={!!errors.body}
             />
             {errors.body && (
-              <p className="text-sm text-destructive">{errors.body.message}</p>
+              <p className="text-red-400 font-mono text-xs">! {errors.body.message}</p>
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="category">Category</Label>
-            <select
+            <Label htmlFor="category" className="text-amber-400/70 font-mono text-xs uppercase">
+              &gt; category
+            </Label>
+            <Select
               id="category"
-              className="flex h-8 w-full rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm"
               {...register("category")}
             >
               <option value="GENERAL">General</option>
               <option value="TECHNICAL">Technical</option>
               <option value="REFUND">Refund</option>
-            </select>
+            </Select>
             {errors.category && (
-              <p className="text-sm text-destructive">{errors.category.message}</p>
+              <p className="text-red-400 font-mono text-xs">! {errors.category.message}</p>
             )}
           </div>
-          <div className="flex gap-2">
-            <Button type="submit" disabled={isPending}>
-              {isPending ? "Creating..." : "Create Ticket"}
+          <div className="flex gap-2 pt-2">
+            <Button
+              type="submit"
+              disabled={isPending}
+              className="font-mono"
+            >
+              {isPending ? "[ creating... ]" : "[ create ]"}
             </Button>
-            <Button type="button" variant="outline" onClick={() => {
-              onCancel()
-              reset()
-            }}>
-              Cancel
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                onCancel()
+                reset()
+              }}
+              className="font-mono"
+            >
+              [ cancel ]
             </Button>
           </div>
         </form>

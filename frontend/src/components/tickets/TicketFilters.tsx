@@ -1,4 +1,5 @@
 import { Input } from "@/components/ui/input"
+import { Select } from "@/components/ui/select"
 
 interface TicketFiltersProps {
   search: string
@@ -18,18 +19,18 @@ export function TicketFilters({
   onCategoryChange,
 }: TicketFiltersProps) {
   return (
-    <div className="flex flex-col sm:flex-row gap-4">
+    <div className="flex flex-col sm:flex-row gap-3">
       <div className="flex-1">
         <Input
           type="text"
-          placeholder="Search tickets..."
+          placeholder="search tickets..."
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
+          className="font-mono"
         />
       </div>
       <div className="w-full sm:w-40">
-        <select
-          className="flex h-8 w-full rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm"
+        <Select
           value={status}
           onChange={(e) => onStatusChange(e.target.value)}
         >
@@ -37,11 +38,10 @@ export function TicketFilters({
           <option value="OPEN">Open</option>
           <option value="RESOLVED">Resolved</option>
           <option value="CLOSED">Closed</option>
-        </select>
+        </Select>
       </div>
       <div className="w-full sm:w-40">
-        <select
-          className="flex h-8 w-full rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm"
+        <Select
           value={category}
           onChange={(e) => onCategoryChange(e.target.value)}
         >
@@ -49,7 +49,7 @@ export function TicketFilters({
           <option value="GENERAL">General</option>
           <option value="TECHNICAL">Technical</option>
           <option value="REFUND">Refund</option>
-        </select>
+        </Select>
       </div>
     </div>
   )

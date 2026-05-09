@@ -5,6 +5,7 @@ import { createUserSchema, type CreateUserInput, type UserRole } from "@helpdesk
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Select } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 const formSchema = createUserSchema.extend({
@@ -41,76 +42,91 @@ export function CreateUserForm({ onSubmit, onCancel, isPending }: CreateUserForm
   })
 
   return (
-    <Card>
+    <Card className="border-amber-500/20">
       <CardHeader>
-        <CardTitle>Add New Agent</CardTitle>
+        <div className="flex items-center gap-2">
+          <span className="text-amber-500 font-mono">&gt;</span>
+          <CardTitle className="text-sm font-mono text-amber-400/80 uppercase tracking-wider">
+            add agent
+          </CardTitle>
+        </div>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit((data) => onSubmit(data))} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="form-name">Name</Label>
+              <Label htmlFor="form-name" className="text-amber-400/70 font-mono text-xs uppercase">
+                &gt; name
+              </Label>
               <Input
                 id="form-name"
                 type="text"
                 placeholder="Name"
                 {...register("name")}
+                className="border-amber-500/30 bg-[oklch(0.08_0_0)] text-amber-400 font-mono placeholder:text-amber-500/30"
                 aria-invalid={!!errors.name}
               />
               {errors.name && (
-                <p className="text-sm text-destructive">{errors.name.message}</p>
+                <p className="text-red-400 font-mono text-xs">! {errors.name.message}</p>
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="form-email">Email</Label>
+              <Label htmlFor="form-email" className="text-amber-400/70 font-mono text-xs uppercase">
+                &gt; email
+              </Label>
               <Input
                 id="form-email"
                 type="email"
                 placeholder="Email"
                 {...register("email")}
+                className="border-amber-500/30 bg-[oklch(0.08_0_0)] text-amber-400 font-mono placeholder:text-amber-500/30"
                 aria-invalid={!!errors.email}
               />
               {errors.email && (
-                <p className="text-sm text-destructive">{errors.email.message}</p>
+                <p className="text-red-400 font-mono text-xs">! {errors.email.message}</p>
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="form-password">Password</Label>
+              <Label htmlFor="form-password" className="text-amber-400/70 font-mono text-xs uppercase">
+                &gt; password
+              </Label>
               <Input
                 id="form-password"
                 type="password"
                 placeholder="Password"
                 {...register("password")}
+                className="border-amber-500/30 bg-[oklch(0.08_0_0)] text-amber-400 font-mono placeholder:text-amber-500/30"
                 aria-invalid={!!errors.password}
               />
               {errors.password && (
-                <p className="text-sm text-destructive">{errors.password.message}</p>
+                <p className="text-red-400 font-mono text-xs">! {errors.password.message}</p>
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="form-role">Role</Label>
-              <select
+              <Label htmlFor="form-role" className="text-amber-400/70 font-mono text-xs uppercase">
+                &gt; role
+              </Label>
+              <Select
                 id="form-role"
-                className="flex h-8 w-full rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm"
                 {...register("role")}
               >
                 <option value="AGENT">Agent</option>
                 <option value="ADMIN">Admin</option>
-              </select>
+              </Select>
               {errors.role && (
-                <p className="text-sm text-destructive">{errors.role.message}</p>
+                <p className="text-red-400 font-mono text-xs">! {errors.role.message}</p>
               )}
             </div>
           </div>
-          <div className="flex gap-2">
-            <Button type="submit" disabled={isPending}>
-              {isPending ? "Creating..." : "Create"}
+          <div className="flex gap-2 pt-2">
+            <Button type="submit" disabled={isPending} className="font-mono">
+              {isPending ? "[ creating... ]" : "[ create ]"}
             </Button>
             <Button type="button" variant="outline" onClick={() => {
               onCancel()
               reset()
-            }}>
-              Cancel
+            }} className="font-mono">
+              [ cancel ]
             </Button>
           </div>
         </form>

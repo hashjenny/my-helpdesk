@@ -9,12 +9,19 @@ import { RefreshCw, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
+import { Select } from "@/components/ui/select"
 import { TicketResponses, ReplyForm, EmailBadge } from "@/components/tickets"
 
 const statusColors: Record<TicketStatus, string> = {
-  OPEN: "bg-yellow-100 text-yellow-800",
-  RESOLVED: "bg-green-100 text-green-800",
-  CLOSED: "bg-gray-100 text-gray-800",
+  OPEN: "border-yellow-500/50 text-yellow-400 bg-yellow-500/10",
+  RESOLVED: "border-green-500/50 text-green-400 bg-green-500/10",
+  CLOSED: "border-gray-500/50 text-gray-400 bg-gray-500/10",
+}
+
+const categoryColors: Record<TicketCategory, string> = {
+  GENERAL: "border-blue-500/50 text-blue-400 bg-blue-500/10",
+  TECHNICAL: "border-orange-500/50 text-orange-400 bg-orange-500/10",
+  REFUND: "border-red-500/50 text-red-400 bg-red-500/10",
 }
 
 export function TicketDetail() {
@@ -154,25 +161,27 @@ export function TicketDetail() {
         {/* Left column - Ticket content */}
         <div className="lg:col-span-2 space-y-6">
           <div>
-            <h1 className="text-2xl font-bold">{ticket.subject}</h1>
-            <div className="flex items-center gap-3 mt-2">
-              <span className={`inline-flex items-center rounded-md px-2 py-0.5 text-sm font-medium ${statusColors[ticket.status as TicketStatus]}`}>
+            <h1 className="text-2xl font-bold font-mono text-amber-400/90">{ticket.subject}</h1>
+            <div className="flex items-center gap-3 mt-2 flex-wrap">
+              <span className={`inline-flex items-center rounded border px-2 py-0.5 text-xs font-mono ${statusColors[ticket.status as TicketStatus]}`}>
                 {ticket.status}
               </span>
-              <span className="text-sm text-muted-foreground">{ticket.category}</span>
+              <span className={`inline-flex items-center rounded border px-2 py-0.5 text-xs font-mono ${categoryColors[ticket.category as TicketCategory]}`}>
+                {ticket.category}
+              </span>
               <EmailBadge email={ticket.supportEmail} />
               {ticket.assignee && (
-                <span className="text-sm bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
+                <span className="text-xs font-mono border border-amber-500/50 text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded">
                   {ticket.assignee.name}
                 </span>
               )}
-              <span className="text-sm text-muted-foreground">
+              <span className="text-xs font-mono text-amber-500/50">
                 {new Date(ticket.createdAt).toLocaleString()}
               </span>
             </div>
           </div>
 
-          <Card className="border-blue-200 mt-2">
+          <Card className="border-amber-500/20 bg-[oklch(0.11_0_0)]">
             <CardContent className="pt-3 pb-3">
               <div className="flex items-start gap-2">
                 <div className="flex-1">
@@ -182,19 +191,19 @@ export function TicketDetail() {
                       disabled={isSummaryLoading}
                       variant="outline"
                       size="sm"
-                      className="h-7 text-xs gap-1"
+                      className="h-7 text-xs gap-1 font-mono border-amber-500/30 text-amber-400/80 hover:bg-amber-500/10"
                     >
                       {isSummaryLoading ? (
-                        <><RefreshCw className={`w-3 h-3 animate-spin`} /> 生成中...</>
+                        <><RefreshCw className={`w-3 h-3 animate-spin`} /> generating...</>
                       ) : (
-                        <><Sparkles className="w-3 h-3" /> AI 总结</>
+                        <><Sparkles className="w-3 h-3" /> ai summary</>
                       )}
                     </Button>
                   </div>
                   {summaryError ? (
-                    <p className="text-sm text-destructive">生成失败，请重试</p>
+                    <p className="text-sm text-red-400 font-mono">! generation failed</p>
                   ) : summary ? (
-                    <p className="text-sm text-blue-900 whitespace-pre-wrap mt-2">{summary}</p>
+                    <p className="text-sm text-amber-400/80 font-mono whitespace-pre-wrap mt-2 border-l-2 border-amber-500/30 pl-3">{summary}</p>
                   ) : null}
                 </div>
               </div>
@@ -222,22 +231,24 @@ export function TicketDetail() {
               disabled={isSuggestingReplies}
               variant="outline"
               size="sm"
-              className="text-xs gap-1"
+              className="text-xs gap-1 font-mono border-amber-500/30 text-amber-400/80 hover:bg-amber-500/10"
             >
               <Sparkles className="w-3 h-3" />
-              {isSuggestingReplies ? "生成中..." : "AI 推荐回复"}
+              {isSuggestingReplies ? "generating..." : "ai suggested replies"}
             </Button>
           </div>
 
           {suggestedReplies.length > 0 && (
-            <div className="mb-3 p-3 bg-purple-50 border border-purple-200 rounded-md">
-              <p className="text-xs font-medium text-purple-700 mb-2">推荐回复：</p>
+            <div className="mb-3 p-3 border border-amber-500/30 bg-[oklch(0.11_0_0)] rounded">
+              <p className="text-xs font-mono text-amber-500/70 mb-2 uppercase tracking-wider">
+                // suggested replies:
+              </p>
               <div className="flex flex-wrap gap-2">
                 {suggestedReplies.map((reply, i) => (
                   <button
                     key={i}
                     onClick={() => setReplyText(reply)}
-                    className="text-xs text-left px-2 py-1 bg-white border border-purple-200 rounded hover:bg-purple-100 transition-colors"
+                    className="text-xs text-left px-2 py-1 border border-amber-500/40 bg-[oklch(0.08_0_0)] text-amber-400/80 rounded hover:bg-amber-500/10 hover:border-amber-500/60 transition-all font-mono"
                   >
                     {reply}
                   </button>
@@ -251,15 +262,21 @@ export function TicketDetail() {
 
         {/* Right column - Controls */}
         <div className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Ticket Properties</CardTitle>
+          <Card className="border-amber-500/20 bg-[oklch(0.11_0_0)]">
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-2">
+                <span className="text-amber-500 font-mono">{'//'}</span>
+                <CardTitle className="text-sm font-mono text-amber-400/80 uppercase tracking-wider">
+                  ticket properties
+                </CardTitle>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div>
-                <label className="text-sm font-medium block mb-1">Status</label>
-                <select
-                  className="w-full border rounded px-3 py-2 text-sm"
+              <div className="space-y-2">
+                <label className="text-xs font-mono text-amber-500/60 uppercase tracking-wider block">
+                  &gt; status
+                </label>
+                <Select
                   value={ticket.status}
                   onChange={(e) => handleStatusChange(e.target.value as TicketStatus)}
                   disabled={updateMutation.isPending}
@@ -267,25 +284,26 @@ export function TicketDetail() {
                   <option value="OPEN">Open</option>
                   <option value="RESOLVED">Resolved</option>
                   <option value="CLOSED">Closed</option>
-                </select>
+                </Select>
               </div>
 
-              <div>
-                <label className="text-sm font-medium block mb-1">Category</label>
+              <div className="space-y-2">
+                <label className="text-xs font-mono text-amber-500/60 uppercase tracking-wider block">
+                  &gt; category
+                </label>
                 <div className="flex items-center gap-2 mb-1">
                   <Button
                     onClick={handleClassify}
                     disabled={isClassifying}
                     variant="outline"
                     size="sm"
-                    className="h-7 text-xs gap-1"
+                    className="h-6 text-xs gap-1 font-mono border-amber-500/30 text-amber-400/80 hover:bg-amber-500/10"
                   >
                     <Sparkles className="w-3 h-3" />
-                    {isClassifying ? "分析中..." : "AI 分类"}
+                    {isClassifying ? "analyzing..." : "ai classify"}
                   </Button>
                 </div>
-                <select
-                  className="w-full border rounded px-3 py-2 text-sm"
+                <Select
                   value={ticket.category}
                   onChange={(e) => handleCategoryChange(e.target.value as TicketCategory)}
                   disabled={updateMutation.isPending}
@@ -293,40 +311,43 @@ export function TicketDetail() {
                   <option value="GENERAL">General</option>
                   <option value="TECHNICAL">Technical</option>
                   <option value="REFUND">Refund</option>
-                </select>
+                </Select>
                 {suggestedCategory && suggestedCategory !== ticket.category && (
                   <div className="mt-2 flex items-center gap-2">
-                    <span className="text-xs bg-purple-100 text-purple-800 px-2 py-0.5 rounded flex items-center gap-1">
+                    <span className="text-xs font-mono border border-amber-500/50 text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded flex items-center gap-1">
                       <Sparkles className="w-3 h-3" />
-                      AI建议: {suggestedCategory}
+                      ai: {suggestedCategory}
                     </span>
                     <button
                       onClick={applySuggestedCategory}
-                      className="text-xs text-purple-600 hover:text-purple-800 underline"
+                      className="text-xs font-mono text-amber-500/70 hover:text-amber-400 hover:underline"
                     >
-                      应用
+                      [apply]
                     </button>
                   </div>
                 )}
-                {isClassifying && <span className="text-xs text-muted-foreground mt-1 block">AI分析中...</span>}
+                {isClassifying && (
+                  <span className="text-xs font-mono text-amber-500/50 mt-1 block">ai analyzing...</span>
+                )}
               </div>
 
               {isAdmin && agents && (
-                <div>
-                  <label className="text-sm font-medium block mb-1">Assigned To</label>
-                  <select
-                    className="w-full border rounded px-3 py-2 text-sm"
+                <div className="space-y-2">
+                  <label className="text-xs font-mono text-amber-500/60 uppercase tracking-wider block">
+                    &gt; assigned to
+                  </label>
+                  <Select
                     value={ticket.assignedTo ?? ""}
                     onChange={(e) => handleAssignment(e.target.value || null)}
                     disabled={updateMutation.isPending}
                   >
-                    <option value="">Unassigned</option>
+                    <option value="">unassigned</option>
                     {agents.map((agent) => (
                       <option key={agent.id} value={agent.id}>
                         {agent.name}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                 </div>
               )}
             </CardContent>

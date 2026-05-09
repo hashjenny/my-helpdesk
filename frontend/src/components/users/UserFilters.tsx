@@ -1,4 +1,5 @@
 import { Input } from "@/components/ui/input"
+import { Select } from "@/components/ui/select"
 
 interface UserFiltersProps {
   search: string
@@ -14,25 +15,25 @@ export function UserFilters({
   onRoleFilterChange,
 }: UserFiltersProps) {
   return (
-    <div className="flex flex-col sm:flex-row gap-4">
+    <div className="flex flex-col sm:flex-row gap-3">
       <div className="flex-1">
         <Input
           type="text"
-          placeholder="Search by name or email..."
+          placeholder="search by name or email..."
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
+          className="font-mono"
         />
       </div>
       <div className="w-full sm:w-40">
-        <select
-          className="flex h-8 w-full rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm"
+        <Select
           value={roleFilter}
           onChange={(e) => onRoleFilterChange(e.target.value)}
         >
           <option value="">All Roles</option>
           <option value="ADMIN">Admin</option>
           <option value="AGENT">Agent</option>
-        </select>
+        </Select>
       </div>
     </div>
   )
