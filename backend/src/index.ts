@@ -1,11 +1,13 @@
-import "dotenv/config"
+import dotenv from "dotenv"
+import path from "path"
+import { fileURLToPath } from "url"
+dotenv.config({ path: path.join(fileURLToPath(import.meta.url), "../..", ".env") })
+
 import express from "express"
 import cors from "cors"
 import rateLimit from "express-rate-limit"
 import { toNodeHandler } from "better-auth/node"
 import * as Sentry from "@sentry/node"
-import path from "path"
-import { fileURLToPath } from "url"
 import { auth } from "./auth.js"
 import usersRouter from "./routes/users.js"
 import ticketsRouter from "./routes/tickets.js"
