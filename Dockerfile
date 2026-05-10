@@ -23,7 +23,7 @@ COPY shared/package.json ./shared/package.json
 COPY backend/package.json ./backend/package.json
 COPY frontend/package.json ./frontend/package.json
 
-RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
+RUN --mount=type=cache,id=pnpm-store-v1,target=/pnpm/store \
   pnpm install --frozen-lockfile
 
 FROM dependencies AS build
@@ -58,7 +58,7 @@ COPY shared/package.json ./shared/package.json
 COPY backend/package.json ./backend/package.json
 COPY backend/prisma ./backend/prisma
 
-RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
+RUN --mount=type=cache,id=pnpm-store-v1,target=/pnpm/store \
   pnpm install --frozen-lockfile --prod \
   && pnpm --filter backend prisma:generate
 
