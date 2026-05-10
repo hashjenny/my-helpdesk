@@ -1,7 +1,4 @@
-import dotenv from "dotenv"
-import path from "path"
-import { fileURLToPath } from "url"
-dotenv.config({ path: path.join(fileURLToPath(import.meta.url), "../..", ".env") })
+import "./env.js"
 
 import { PgBoss } from "pg-boss"
 import { logger } from "./logger.js"

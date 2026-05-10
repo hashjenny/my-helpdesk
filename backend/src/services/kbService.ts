@@ -1,7 +1,6 @@
-import dotenv from "dotenv"
+import "../lib/env.js"
 import path from "path"
 import { fileURLToPath } from "url"
-dotenv.config({ path: path.join(fileURLToPath(import.meta.url), "../..", ".env") })
 
 import Anthropic from "@anthropic-ai/sdk"
 import { readFileSync } from "fs"

@@ -1,23 +1,32 @@
 import { defineConfig } from 'vitest/config'
+import { loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import path from 'path'
 
-export default defineConfig({
-  plugins: [react(), tailwindcss()],
-  base: '/',
-  build: {
-    outDir: '../backend/public',
-    emptyOutDir: true,
-  },
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'),
+const rootDir = path.resolve(__dirname, '..')
+
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, rootDir, '')
+
+  return {
+    envDir: rootDir,
+    plugins: [react(), tailwindcss()],
+    base: '/',
+    build: {
+      outDir: '../backend/public',
+      emptyOutDir: true,
+      sourcemap: env.SENTRY_AUTH_TOKEN ? 'hidden' : false,
     },
-  },
-  test: {
-    globals: true,
-    environment: 'jsdom',
-    setupFiles: ['./src/test/setup.ts'],
-  },
+    resolve: {
+      alias: {
+        '@': path.resolve(__dirname, './src'),
+      },
+    },
+    test: {
+      globals: true,
+      environment: 'jsdom',
+      setupFiles: ['./src/test/setup.ts'],
+    },
+  }
 })

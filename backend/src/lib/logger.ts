@@ -1,14 +1,5 @@
-import * as Sentry from "@sentry/node"
-
-const DSN = "https://68033a0e75cd239735c2814c55beaacd@o4511357945053184.ingest.us.sentry.io/4511358000037888"
-const isProduction = process.env.NODE_ENV === "production"
-
-if (isProduction) {
-  Sentry.init({
-    dsn: DSN,
-    tracesSampleRate: 1.0,
-  })
-}
+import { isProduction } from "./env.js"
+import { Sentry, isSentryEnabled } from "./sentry.js"
 
 type LogLevel = "debug" | "info" | "warn" | "error"
 
@@ -28,9 +19,9 @@ const log = (level: LogLevel, message: string, data?: unknown) => {
         break
       case "error":
         console.error(...args)
-        if (data instanceof Error) {
+        if (isSentryEnabled && data instanceof Error) {
           Sentry.captureException(data)
-        } else {
+        } else if (isSentryEnabled) {
           Sentry.captureMessage(message, "error")
         }
         break

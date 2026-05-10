@@ -23,40 +23,49 @@ AI-powered ticket management system.
 1. Install dependencies:
 
 ```bash
-# Frontend
-cd frontend
-npm install
-
-# Backend
-cd backend
-npm install
+pnpm install
 ```
 
 2. Set up environment variables:
 
 ```bash
-# Backend
-cp backend/.env.example backend/.env
-# Edit backend/.env with your database URL and secrets
+cp .env.example .env
+# Edit .env with database, auth, email, AI, and optional Sentry values.
 ```
 
 3. Run database migrations:
 
 ```bash
-cd backend
-npx prisma migrate dev
+pnpm --filter backend prisma migrate dev
 ```
 
 4. Start the development servers:
 
 ```bash
-# Terminal 1 - Backend
-cd backend
-npm run dev
+# Terminal 1
+pnpm dev:backend
 
-# Terminal 2 - Frontend
-cd frontend
-npm run dev
+# Terminal 2
+pnpm dev:frontend
+```
+
+The frontend, backend, and Playwright E2E setup all read environment values from the root `.env` file. Use `.env.example` for local development. `.env.test` can override those values for E2E runs.
+
+## Production
+
+Production builds compile the Vite frontend into `backend/public`, then the Express backend serves those static files and `/api/*` from one Railway service.
+
+```bash
+pnpm build
+pnpm start
+```
+
+Railway uses `railway.json` with the root `Dockerfile`. Set Railway variables from `.env.production.example`, especially `DATABASE_URL`, `NODE_ENV=production`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `TRUSTED_ORIGINS`, and optional `SENTRY_DSN` / `VITE_SENTRY_DSN`.
+
+Build the Docker image locally with:
+
+```bash
+pnpm docker:build
 ```
 
 ## Project Structure

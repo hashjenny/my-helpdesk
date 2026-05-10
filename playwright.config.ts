@@ -22,8 +22,13 @@ function parseEnvFile(filePath: string): Record<string, string> {
   return env;
 }
 
+const envPath = path.join(__dirname, ".env");
 const envTestPath = path.join(__dirname, ".env.test");
-const envVars = fs.existsSync(envTestPath) ? parseEnvFile(envTestPath) : {};
+const envVars = {
+  ...(fs.existsSync(envPath) ? parseEnvFile(envPath) : {}),
+  ...(fs.existsSync(envTestPath) ? parseEnvFile(envTestPath) : {}),
+};
+Object.assign(process.env, envVars);
 const apiBaseUrl = envVars.BETTER_AUTH_URL || `http://localhost:${envVars.PORT || "3001"}`;
 const apiPort = (() => {
   try {
@@ -79,6 +84,7 @@ export default defineConfig({
       reuseExistingServer: true,
       timeout: 120 * 1000,
       env: {
+        ...envVars,
         NODE_ENV: "test",
         VITE_API_URL: apiBaseUrl,
       },

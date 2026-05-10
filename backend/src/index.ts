@@ -1,13 +1,12 @@
-import dotenv from "dotenv"
+import "./lib/env.js"
+import { Sentry, isSentryEnabled } from "./lib/sentry.js"
 import path from "path"
 import { fileURLToPath } from "url"
-dotenv.config({ path: path.join(fileURLToPath(import.meta.url), "../..", ".env") })
 
 import express from "express"
 import cors from "cors"
 import rateLimit from "express-rate-limit"
 import { toNodeHandler } from "better-auth/node"
-import * as Sentry from "@sentry/node"
 import { auth } from "./auth.js"
 import usersRouter from "./routes/users.js"
 import ticketsRouter from "./routes/tickets.js"
@@ -15,18 +14,9 @@ import emailRouter from "./routes/email.js"
 import dashboardRouter from "./routes/dashboard.js"
 import { startClassifierWorker } from "./worker/classifier.js"
 import { logger } from "./lib/logger.js"
+import { isProduction } from "./lib/env.js"
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-
-const DSN = "https://68033a0e75cd239735c2814c55beaacd@o4511357945053184.ingest.us.sentry.io/4511358000037888"
-const isProduction = process.env.NODE_ENV === "production"
-
-if (isProduction) {
-  Sentry.init({
-    dsn: DSN,
-    tracesSampleRate: 1.0,
-  })
-}
 
 const app = express()
 
@@ -93,9 +83,13 @@ app.get("/api/health", (_req, res) => res.json({ status: "ok" }))
 
 // Serve static frontend files in production
 if (isProduction) {
-  const publicPath = path.join(__dirname, "public")
+  const publicPath = path.join(__dirname, "..", "public")
   app.use(express.static(publicPath))
-  app.get("*", (_req, res) => res.sendFile(path.join(publicPath, "index.html")))
+  app.get("/{*splat}", (_req, res) => res.sendFile(path.join(publicPath, "index.html")))
+}
+
+if (isSentryEnabled) {
+  Sentry.setupExpressErrorHandler(app)
 }
 
 // Error handler - don't leak internal details
@@ -106,7 +100,9 @@ app.use((err: any, _req: express.Request, res: express.Response, _next: express.
 
 const PORT = Number(process.env.PORT) || 3001
 
-app.listen(PORT, async () => {
+app.listen(PORT, () => {
   logger.info(`Server running on port ${PORT}`)
-  await startClassifierWorker()
+  startClassifierWorker().catch((error) => {
+    logger.error("Classifier worker failed to start", error)
+  })
 })

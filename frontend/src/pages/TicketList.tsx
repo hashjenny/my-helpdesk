@@ -2,7 +2,7 @@ import { useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useAuth } from "@/hooks/useAuth"
 import { fetchTickets, createTicket, deleteTicket } from "../lib/api/tickets"
-import type { CreateTicketInput, Ticket } from "@helpdesk/shared"
+import type { CreateTicketInput } from "@helpdesk/shared"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { TicketFilters, TicketTable, CreateTicketForm } from "@/components/tickets"
@@ -109,7 +109,7 @@ export function TicketList() {
         isLoading={isLoading}
         error={error instanceof Error ? error : null}
         limit={limit}
-        onEdit={(_ticket: Ticket) => {}}
+        onEdit={() => {}}
         onDelete={handleDelete}
         deletePending={deleteMutation.isPending}
       />

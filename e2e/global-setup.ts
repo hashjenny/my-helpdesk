@@ -1,6 +1,8 @@
 import { execSync } from 'child_process'
 
-const DATABASE_URL = 'postgresql://postgres:toor@localhost:5432/helpdesk_test'
+const DATABASE_URL = process.env.DATABASE_URL || 'postgresql://postgres:toor@localhost:5432/helpdesk_test'
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@test.com'
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'testpass123'
 
 async function globalSetup() {
   // Create test database if it doesn't exist using psql with password
@@ -24,8 +26,8 @@ async function globalSetup() {
     env: {
       ...process.env,
       DATABASE_URL,
-      ADMIN_EMAIL: 'admin@test.com',
-      ADMIN_PASSWORD: 'testpass123',
+      ADMIN_EMAIL,
+      ADMIN_PASSWORD,
     },
     stdio: 'inherit',
   })

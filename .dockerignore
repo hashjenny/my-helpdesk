@@ -3,6 +3,7 @@ dist
 .git
 .gitignore
 *.md
+!knowledge-base.md
 .env
 .env.*
 !.env.example

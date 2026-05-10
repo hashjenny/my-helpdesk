@@ -1,8 +1,27 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
 
+const createMessageMock = vi.fn()
+
+vi.mock("@anthropic-ai/sdk", () => ({
+  default: vi.fn().mockImplementation(function () {
+    return {
+      messages: {
+        create: createMessageMock,
+      },
+    }
+  }),
+}))
+
+function mockTextResponse(text: string) {
+  createMessageMock.mockResolvedValueOnce({
+    content: [{ type: "text", text }],
+  })
+}
+
 describe("aiService", () => {
   beforeEach(() => {
-    // Mock process.env
+    vi.resetModules()
+    createMessageMock.mockReset()
     vi.stubEnv("MINIMAX_API_KEY", "test-key")
   })
 
@@ -12,11 +31,7 @@ describe("aiService", () => {
 
   describe("classifyTicket", () => {
     it("returns TECHNICAL for technical issue", async () => {
-      // @ts-ignore
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve({ choices: [{ message: { content: "TECHNICAL" } }] }),
-      })
+      mockTextResponse("TECHNICAL")
 
       const { aiService } = await import("./aiService.js")
       const result = await aiService.classifyTicket("无法登录", "登录报错500")
@@ -24,22 +39,14 @@ describe("aiService", () => {
     })
 
     it("throws on invalid category response", async () => {
-      // @ts-ignore
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve({ choices: [{ message: { content: "GARBAGE" } }] }),
-      })
+      mockTextResponse("GARBAGE")
 
       const { aiService } = await import("./aiService.js")
       await expect(aiService.classifyTicket("test", "test")).rejects.toThrow()
     })
 
     it("returns GENERAL for general inquiry", async () => {
-      // @ts-ignore
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve({ choices: [{ message: { content: "GENERAL" } }] }),
-      })
+      mockTextResponse("GENERAL")
 
       const { aiService } = await import("./aiService.js")
       const result = await aiService.classifyTicket("如何重置密码", "忘记了密码")
@@ -47,11 +54,7 @@ describe("aiService", () => {
     })
 
     it("returns REFUND for refund request", async () => {
-      // @ts-ignore
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve({ choices: [{ message: { content: "REFUND" } }] }),
-      })
+      mockTextResponse("REFUND")
 
       const { aiService } = await import("./aiService.js")
       const result = await aiService.classifyTicket("退款申请", "申请全额退款")
@@ -61,11 +64,7 @@ describe("aiService", () => {
 
   describe("suggestReplies", () => {
     it("returns array of replies", async () => {
-      // @ts-ignore
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve({ choices: [{ message: { content: "谢谢您的反馈\n我们会尽快处理\n感谢您的耐心" } }] }),
-      })
+      mockTextResponse("谢谢您的反馈\n我们会尽快处理\n感谢您的耐心")
 
       const { aiService } = await import("./aiService.js")
       const result = await aiService.suggestReplies({ subject: "test", body: "test", responses: [] })
@@ -74,11 +73,7 @@ describe("aiService", () => {
     })
 
     it("returns empty array for empty response", async () => {
-      // @ts-ignore
-      global.fetch = vi.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve({ choices: [{ message: { content: "" } }] }),
-      })
+      mockTextResponse("")
 
       const { aiService } = await import("./aiService.js")
       const result = await aiService.suggestReplies({ subject: "test", body: "test", responses: [] })
