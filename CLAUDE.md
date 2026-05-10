@@ -1,337 +1,77 @@
 # Project Context
 
-This is an AI-powered ticket management system.
+AI-powered ticket management system.
 
-## Documentation Rule
+## Documentation
 
-When asking about libraries, frameworks, SDKs, APIs, or CLI tools — **always use Context7 MCP** to fetch current documentation first. Do NOT rely on training data for library-specific syntax, configuration, or best practices.
+**Always use Context7 MCP** for library/SDK questions. Run `npx ctx7@latest library <name>` then `npx ctx7@latest docs <id>`.
 
 ## Tech Stack
 
-- Frontend: React 19 + TypeScript + Vite + React Router + Tailwind CSS + shadcn/ui + **TanStack Query** + **TanStack Table** + **Axios**
-- Backend: Express + TypeScript + Node.js
-- Database: PostgreSQL + Prisma 5
-- Auth: Better Auth with bcrypt password hashing
-- AI: MiniMax API via Anthropic SDK (`@anthropic-ai/sdk` with `baseURL: "https://api.minimaxi.com/anthropic"`, model: `MiniMax-M2.7`)
-- Email: Resend (inbound email to ticket conversion)
+- **Frontend:** React 19 + TypeScript + Vite + React Router + Tailwind + shadcn/ui + TanStack Query + TanStack Table + Axios
+- **Backend:** Express + TypeScript + Node.js
+- **Database:** PostgreSQL + Prisma 5
+- **Auth:** Better Auth + bcrypt
+- **AI:** MiniMax via `@anthropic-ai/sdk` (`baseURL: "https://api.minimaxi.com/anthropic"`, model: `MiniMax-M2.7`)
+- **Email:** Resend
 
 ## Package Manager
 
-This project uses **pnpm** with workspace configuration:
+pnpm workspace (`shared/`, `backend/`, `frontend/`):
 
-```yaml
-packages:
-  - shared
-  - backend
-  - frontend
-```
-
-Commands:
-
-- `pnpm install` - Install all dependencies
-- `pnpm build` - Build all packages (shared → backend → frontend)
-- `pnpm --filter backend dev` - Start backend dev server
-- `pnpm --filter frontend dev` - Start frontend dev server
-- `pnpm --filter backend prisma:generate` - Generate Prisma client
-
-## UI Components
-
-This project uses **shadcn/ui** with Tailwind CSS v4 and the `base-nova` style variant.
-
-### Key Components Available
-
-- `Button` - button with variants (default, outline, ghost, destructive)
-- `Card` - card components (Card, CardHeader, CardContent, CardTitle, CardDescription)
-- `Input` - form input field
-- `Label` - form label
-- `Alert` - alert messages with variants
-- `Table` - table components (Table, TableHeader, TableBody, TableRow, TableHead, TableCell)
-- `Separator` - horizontal/vertical separator
-
-### Import Alias
-
-Use `@/` prefix for imports from `frontend/src/`:
-
-```tsx
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-```
-
-### Path Configuration
-
-- TypeScript: `tsconfig.app.json` with `baseUrl: "."` and `paths: { "@/*": ["./src/*"] }`
-- Vite: `vite.config.ts` with resolve alias for `@`
+- `pnpm install` | `pnpm build` | `pnpm --filter backend dev` | `pnpm --filter frontend dev`
 
 ## Key Paths
 
-- Frontend: `frontend/src/`
-- Backend: `backend/src/`
-- Shared: `shared/` (schemas and types shared between frontend and backend)
-- Prisma schema: `backend/prisma/schema.prisma`
-- API modules: `frontend/src/lib/api/` (Axios)
-- Query client: `frontend/src/lib/query-client.ts` (TanStack Query)
+| Path | Purpose |
+| :--- | :--- |
+| `frontend/src/` | Frontend source |
+| `backend/src/` | Backend source |
+| `shared/` | Zod schemas shared via `@helpdesk/shared` |
+| `backend/prisma/schema.prisma` | Prisma schema |
 
-### Shared Schemas (`shared/`)
+**Import alias:** `@/` maps to `frontend/src/`
 
-Zod schemas and types shared between frontend and backend via the `@helpdesk/shared` package:
+## Shared Schemas
 
 ```typescript
-import { Role, createUserSchema, TicketStatus, createTicketSchema } from "@helpdesk/shared"
+import { Role, TicketStatus, TicketCategory, createUserSchema, createTicketSchema } from "@helpdesk/shared"
 ```
 
-Available exports:
+## UI Components
 
-- `Role` - object with `ADMIN` and `AGENT` values
-- `UserRole` - TypeScript type for role values
-- `createUserSchema` - Zod schema for user creation
-- `updateUserSchema` - Zod schema for user updates
-- `changePasswordSchema` - Zod schema for password changes
-- `TicketStatus` - readonly array `["OPEN", "RESOLVED", "CLOSED"]`
-- `TicketCategory` - readonly array `["GENERAL", "TECHNICAL", "REFUND"]`
-- `Ticket` - interface for ticket data
-- `createTicketSchema` - Zod schema for ticket creation
-- `updateTicketSchema` - Zod schema for ticket updates
+shadcn/ui with Tailwind CSS v4 (`base-nova` style). Key: `Button`, `Card`, `Input`, `Label`, `Alert`, `Table`, `Separator`.
 
-## Frontend Data Fetching
+## Form Validation
 
-API calls use **Axios** via `frontend/src/lib/api/`:
+React Hook Form + Zod. Use `zodResolver` with schemas from `@helpdesk/shared`.
 
-- `fetchUsers(params)` - GET with pagination/search
-- `createUser(data, token)` - POST
-- `updateUser(id, data, token)` - PATCH
-- `deleteUser(id, token)` - DELETE
-- `fetchTickets(params)` - GET with pagination/filters
-- `fetchTicket(id, token)` - GET single ticket
-- `createTicket(data, token)` - POST
-- `updateTicket(id, data, token)` - PATCH
-- `deleteTicket(id, token)` - DELETE
+## Design System
 
-State management uses **TanStack Query**:
+**Obsidian Terminal** theme — dark mode, amber accent (`oklch(0.75 0.15 75)`), JetBrains Mono font.
 
-- `useQuery` for fetching lists with automatic caching
-- `useMutation` for create/update/delete with `queryClient.invalidateQueries`
-- QueryClientProvider wraps App in `App.tsx`
+Key classes: `border-amber-500/20 bg-[oklch(0.11_0_0)]` (cards), `border-amber-500/30 bg-[oklch(0.08_0_0)] text-amber-400 font-mono` (inputs).
 
-Type-only imports use `import type { User }` (verbatimModuleSyntax enabled)
+## Navigation
 
-### Form Validation
+- `/` — Dashboard
+- `/tickets` — Ticket list
+- `/tickets/:id` — Ticket detail with AI features
+- `/users` — User management (admin only)
 
-Forms use **React Hook Form** + **Zod** for validation. Zod schemas are shared via the `shared/` package:
+## Test Users
 
-```tsx
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
-import { createTicketSchema, type CreateTicketInput } from "@helpdesk/shared"
+- Admin: `admin@helpdesk.com` / `toor123`
+- Agent: `agent@desk.com` / `toor`
 
-export function MyForm() {
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<CreateTicketInput>({
-    resolver: zodResolver(createTicketSchema),
-    defaultValues: { category: "GENERAL" },
-  })
-
-  const onSubmit = (data: CreateTicketInput) => { /* ... */ }
-
-  return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <Input {...register("subject")} aria-invalid={!!errors.subject} />
-      {errors.subject && <p className="text-sm text-destructive">{errors.subject.message}</p>}
-      {/* ... */}
-    </form>
-  )
-}
-```
-
-## Project Status
-
-### Completed Phases
-
-**Phase 1: Project Setup** (completed)
-
-- Frontend scaffold with Vite + React + TypeScript + Tailwind + React Router
-- Backend scaffold with Express + TypeScript + Node.js
-- Prisma initialized with PostgreSQL
-- **Obsidian Terminal** theme (dark mode, amber accent, JetBrains Mono font)
-
-**Phase 2: Database Schema & Models** (completed)
-
-- User model (ADMIN, AGENT roles)
-- Ticket model (OPEN, RESOLVED, CLOSED statuses; GENERAL, TECHNICAL, REFUND categories)
-- TicketResponse model
-- Session model (for Better Auth)
-- Migrations applied to PostgreSQL
-
-**Phase 3: Authentication** (completed)
-
-- Better Auth integration with Express
-- User registration and login (frontend + backend)
-- Session middleware and role-based access control
-- Protected routes for authenticated users
-- Admin user management panel
-- bcrypt password hashing
-- Login page redirects to home if already authenticated
-
-**Phase 4: Ticket Management** (completed)
-
-- Full ticket CRUD API (`/api/tickets`)
-- Ticket list with pagination, search, and filters (status, category)
-- Ticket detail with responses
-- Frontend ticket list and detail pages
-- Email-to-ticket webhook (`/api/webhooks/email`)
-- `supportEmail` field on tickets for email-originated tickets
-- **Client-side sorting** with TanStack Table (click column headers)
-- **Soft delete** (tickets have `deletedAt` field, filtered by default)
-
-**Phase 5: Email Integration** (completed)
-
-- Resend integration for inbound email processing
-- Email notification templates (React Email)
-
-**Phase 6: AI Features** (completed)
-
-- `aiService.ts` with MiniMax API integration via Anthropic SDK (`@anthropic-ai/sdk`)
-- `classifyTicket` - AI classification into GENERAL/TECHNICAL/REFUND
-- `suggestReplies` - AI-generated reply suggestions
-- `summarizeTicket` - AI-powered ticket summarization
-- `polishText` - AI text polishing for agent replies
-
-**Phase 7: Dashboard** (completed)
-
-- `GET /api/dashboard/stats` - Ticket counts by status and category
-- `GET /api/dashboard/recent` - 10 most recent tickets
-- Dashboard page at `/` with stat cards and recent tickets list
-
-### Current Phase
-
-**Phase 8: Polish & Deployment**
-
-### Navigation
-
-- `/` - Dashboard (real data from API)
-- `/tickets` - Ticket list (authenticated users)
-- `/tickets/:id` - Ticket detail with AI features (classify, suggest replies)
-- `/users` - User management (admin only)
-- `/admin/users` - Admin user panel (admin only)
-
-### Test Users
-
-- Admin: <admin@helpdesk.com> / toor123
-- Agent: <agent@desk.com> / toor
-- E2E Test Admin: <admin@test.com> / toor123
-
-### Database
-
-- PostgreSQL running on localhost:5432
-- Database: helpdesk (production)
-- Test Database: helpdesk_test (independent, preserved after tests)
-- User: postgres / toor
-- Prisma migrations applied
-
-### Running Services
+## Services
 
 - Frontend: <http://localhost:5173>
 - Backend: <http://localhost:3001>
+- Database: PostgreSQL on localhost:5432 (db: `helpdesk`)
 
-### API Endpoints
+## E2E Testing
 
-**Ticket API:**
+Use `/playwright` or `playwright-e2e-writer` agent. **Skip if component test covers it.**
 
-- `GET /api/tickets` - List tickets (pagination, filters)
-- `POST /api/tickets` - Create ticket
-- `GET /api/tickets/:id` - Get ticket with responses
-- `PATCH /api/tickets/:id` - Update ticket (status, category)
-- `DELETE /api/tickets/:id` - Delete ticket (admin only)
-- `GET /api/tickets/:id/responses` - List responses
-- `POST /api/tickets/:id/responses` - Add response
-
-**Email Webhook:**
-
-- `POST /api/webhooks/email` - Convert inbound email to ticket
-
-### Implementation Plan
-
-See `plan.md` for full feature breakdown across 8 phases.
-
-## Design System: Obsidian Terminal
-
-The frontend uses a custom **Obsidian Terminal** dark theme:
-
-### Color Palette
-
-- Background: `oklch(0.08 0 0)` (near black)
-- Foreground: `oklch(0.92 0.01 85)` (amber white)
-- Primary accent: `oklch(0.75 0.15 75)` (terminal amber)
-- Border: `oklch(0.22 0.03 75)` (subtle amber border)
-- Destructive: `oklch(0.65 0.2 25)` (terminal red)
-
-### Typography
-
-- Font: **JetBrains Mono** (Google Fonts) for all text
-- Fallback: `ui-monospace, monospace`
-
-### Key Style Classes
-
-- Cards: `border-amber-500/20 bg-[oklch(0.11_0_0)]`
-- Inputs: `border-amber-500/30 bg-[oklch(0.08_0_0)] text-amber-400 font-mono`
-- Buttons: `border-amber-500/50 bg-amber-500/10 text-amber-400 font-mono`
-- Status badges: `border-{color}-500/50 text-{color}-400 bg-{color}-500/10`
-
-### Logging
-
-The project uses a unified logging system with environment-aware behavior:
-
-**Frontend:** `frontend/src/lib/logger.ts`
-**Backend:** `backend/src/lib/logger.ts`
-
-| Environment | Log Output | Sentry |
-|------------|------------|--------|
-| Development | `console.log/info/warn/debug` | Not sent |
-| Production | `console.log/info/warn/debug` | Errors/exceptions uploaded |
-
-Sentry DSNs:
-
-- Frontend: `https://5073e905956759a558b80b4e88be6a82@o4511357945053184.ingest.us.sentry.io/4511357989224449`
-- Backend: `https://68033a0e75cd239735c2814c55beaacd@o4511357945053184.ingest.us.sentry.io/4511358000037888`
-
-## Agents
-
-### Playwright E2E Writer Agent
-
-**Use this agent** when the user asks to:
-
-- Write, create, or add E2E tests
-- Modify or extend existing E2E tests
-- Set up test fixtures or page objects
-- Run or verify E2E tests
-
-**Command:** `/playwright` or invoke via `Task` tool with `playwright-e2e-writer` subagent
-
-**Test files:** `./e2e/` directory
-
-### E2E Test Skip Rule
-
-**若组件测试已覆盖某功能，则跳过对应 E2E 测试。**
-
-例如 `TicketFilters` 组件测试已覆盖搜索和筛选逻辑，则 E2E 不再重复测试该功能。
-
-组件测试位置：`frontend/src/components/**/*.test.tsx`
-
-当前组件测试覆盖：
-
-| 组件 | 状态 |
-|------|------|
-| `TicketFilters` | ✅ 已覆盖搜索、状态/类别筛选 |
-| `TicketTable` | ✅ 已覆盖表格渲染、loading、empty、error、delete |
-| `CreateTicketForm` | ✅ 已覆盖表单字段、提交、取消、pending 状态 |
-| `ReplyForm` | ✅ 已覆盖 textarea、提交按钮、pending 状态 |
-| `EmailBadge` | ✅ 已覆盖渲染/null 情况 |
-| `TicketResponses` | ✅ 已覆盖空状态、响应列表、Agent/Customer 标签 |
-
-**E2E 测试应覆盖（组件测试未覆盖）：**
-
-- 端到端用户流程（登录 → 操作 → 结果）
-- 与真实后端交互的完整 CRUD
-- 页面间导航
-- 排序与真实数据的集成
-- 状态/类别变更（需刷新页面验证）
-- 坐席分配（admin 专属功能）
+Component tests exist for: `TicketFilters`, `TicketTable`, `CreateTicketForm`, `ReplyForm`, `EmailBadge`, `TicketResponses`.
